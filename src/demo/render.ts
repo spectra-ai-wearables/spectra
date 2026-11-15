@@ -93,6 +93,7 @@ export function createRenderer(root: HTMLElement): (view: DemoView) => void {
   let lastEvents = '';
 
   return (view) => {
+    root.dataset.playing = String(view.playing);
     for (const button of scenarioButtons) {
       button.setAttribute('aria-pressed', String(button.dataset.scenario === view.scenario));
     }

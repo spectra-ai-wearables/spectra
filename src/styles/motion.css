@@ -1,0 +1,283 @@
+/*
+ * Motion and hover. Everything here is an enhancement: the page reads the same
+ * with this file removed, and base.css switches it all off under
+ * prefers-reduced-motion.
+ */
+
+:root {
+  --spectrum: linear-gradient(
+    90deg,
+    var(--band-1) 0 20%,
+    var(--band-2) 20% 40%,
+    var(--band-3) 40% 60%,
+    var(--band-4) 60% 80%,
+    var(--band-5) 80% 100%
+  );
+  --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+}
+
+@keyframes draw-in {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+@keyframes band-rise {
+  0% {
+    transform: scaleY(0.25);
+  }
+  60% {
+    transform: scaleY(1.12);
+  }
+  100% {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes pulse {
+  50% {
+    opacity: 0.25;
+  }
+}
+
+@keyframes state-in {
+  from {
+    box-shadow: 0 0 0 8px color-mix(in srgb, var(--flash) 40%, transparent);
+  }
+  to {
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
+/* ---------- Page load ---------- */
+
+.hero > * {
+  animation: rise-in 600ms var(--ease-out) both;
+}
+
+.hero > :nth-child(2) { animation-delay: 80ms; }
+.hero > :nth-child(3) { animation-delay: 160ms; }
+.hero > :nth-child(4) { animation-delay: 240ms; }
+.hero > :nth-child(5) { animation-delay: 320ms; }
+
+.hero::after {
+  transform-origin: left;
+  animation: draw-in 900ms var(--ease-out) 450ms both;
+}
+
+.logo-band {
+  transform-box: fill-box;
+  transform-origin: bottom;
+  animation: band-rise 700ms var(--ease-out) both;
+}
+
+.logo-band-2 { animation-delay: 60ms; }
+.logo-band-3 { animation-delay: 120ms; }
+.logo-band-4 { animation-delay: 180ms; }
+.logo-band-5 { animation-delay: 240ms; }
+
+/* ---------- Reveal on scroll (where the browser supports it) ---------- */
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .section > :not(.demo):not(noscript) {
+      animation: rise-in linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 18%;
+    }
+  }
+}
+
+/* ---------- Hover and focus ---------- */
+
+.site-header nav a {
+  position: relative;
+  transition: color 150ms ease;
+}
+
+.site-header nav a::after,
+.button::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 -6px 0;
+  height: 2px;
+  background: var(--spectrum);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 250ms var(--ease-out);
+}
+
+.site-header nav a:hover::after,
+.site-header nav a:focus-visible::after,
+.button:hover::after,
+.button:focus-visible::after {
+  transform: scaleX(1);
+}
+
+.button {
+  position: relative;
+  transition:
+    transform 150ms var(--ease-out),
+    background-color 150ms ease;
+}
+
+.button::after {
+  inset: auto 0 -8px 0;
+  height: 3px;
+}
+
+.button:active {
+  transform: translateY(1px);
+}
+
+a {
+  transition:
+    color 150ms ease,
+    text-decoration-color 150ms ease;
+}
+
+/* Steps pick up one spectral band each */
+.steps li {
+  transition:
+    border-color 200ms ease,
+    box-shadow 200ms ease,
+    transform 200ms var(--ease-out);
+}
+
+.steps li::before {
+  transition: color 200ms ease;
+}
+
+.steps li:nth-child(5n + 1) { --accent: var(--band-1); }
+.steps li:nth-child(5n + 2) { --accent: var(--band-2); }
+.steps li:nth-child(5n + 3) { --accent: var(--band-3); }
+.steps li:nth-child(5n + 4) { --accent: var(--band-4); }
+.steps li:nth-child(5n + 5) { --accent: var(--band-5); }
+
+.sensor-table td,
+.sensor-table .tag,
+.limits li::before {
+  transition:
+    color 150ms ease,
+    border-color 150ms ease,
+    transform 200ms var(--ease-out);
+}
+
+.demo-bar button {
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease,
+    color 150ms ease,
+    transform 150ms var(--ease-out);
+}
+
+.demo-bar button:active {
+  transform: translateY(1px);
+}
+
+.panel,
+.event {
+  transition: border-color 200ms ease;
+}
+
+@media (hover: hover) {
+  .button:hover {
+    transform: translateY(-2px);
+  }
+
+  .logo:hover .logo-band {
+    animation: band-rise 600ms var(--ease-out);
+  }
+
+  .logo:hover .logo-band-2 { animation-delay: 50ms; }
+  .logo:hover .logo-band-3 { animation-delay: 100ms; }
+  .logo:hover .logo-band-4 { animation-delay: 150ms; }
+  .logo:hover .logo-band-5 { animation-delay: 200ms; }
+
+  .steps li:hover {
+    border-top-color: var(--accent);
+    box-shadow: inset 0 2px 0 var(--accent);
+    transform: translateY(-3px);
+  }
+
+  .steps li:hover::before {
+    color: var(--accent);
+  }
+
+  .sensor-table tbody tr:hover td {
+    color: var(--text);
+  }
+
+  .sensor-table tbody tr:hover .tag {
+    border-color: var(--text-muted);
+    color: var(--text);
+  }
+
+  .limits li:hover::before {
+    color: var(--text);
+    transform: translateX(4px);
+  }
+
+  .demo-bar button:hover {
+    transform: translateY(-1px);
+  }
+
+  .panel:hover {
+    border-color: color-mix(in srgb, var(--line), var(--text-muted) 45%);
+  }
+}
+
+/* ---------- Demo feedback ---------- */
+
+/* A state change flashes once in the state's own color. */
+.reading[data-state='within-pattern'] { --flash: var(--state-ok); }
+.reading[data-state='change-to-verify'] { --flash: var(--state-verify); }
+.reading[data-state='insufficient-data'] { --flash: var(--state-nodata); }
+
+.reading:not([data-state='idle']) {
+  animation: state-in 700ms ease-out;
+}
+
+/* Live indicator while the session plays */
+.demo[data-playing='true'] .panel-meta::before {
+  content: '';
+  display: inline-block;
+  width: 0.5rem;
+  height: 0.5rem;
+  margin-right: var(--space-2);
+  border-radius: 50%;
+  background: var(--band-5);
+  animation: pulse 1s ease-in-out infinite;
+}
+
+.link-status[data-connected='false']::before {
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+.event {
+  position: relative;
+  overflow: hidden;
+  animation: rise-in 350ms var(--ease-out) both;
+}
+
+/* Transmission progress: the simulated delay is 8 s, played in 0.8 s. */
+.event[data-stage='sending']::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 3px;
+  background: var(--spectrum);
+  transform-origin: left;
+  animation: draw-in 800ms linear both;
+}
+
+.chart-cursor {
+  transition: opacity 150ms ease;
+}

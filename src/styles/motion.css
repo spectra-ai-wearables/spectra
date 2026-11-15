@@ -23,6 +23,12 @@
   }
 }
 
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
 @keyframes draw-in {
   from {
     transform: scaleX(0);
@@ -59,7 +65,7 @@
 /* ---------- Page load ---------- */
 
 .hero-copy > * {
-  animation: rise-in 600ms var(--ease-out) both;
+  animation: rise-in 700ms var(--ease-out) both;
 }
 
 .hero-copy > :nth-child(2) { animation-delay: 80ms; }
@@ -67,9 +73,8 @@
 .hero-copy > :nth-child(4) { animation-delay: 240ms; }
 .hero-copy > :nth-child(5) { animation-delay: 320ms; }
 
-.hero-copy::after {
-  transform-origin: left;
-  animation: draw-in 900ms var(--ease-out) 450ms both;
+.hero-stage {
+  animation: fade-in 1400ms ease-out 250ms both;
 }
 
 .logo-band {
@@ -87,40 +92,33 @@
 
 @supports (animation-timeline: view()) {
   @media (prefers-reduced-motion: no-preference) {
-    .section > :not(.demo):not(noscript) {
+    .section > :not(.demo):not(.plate):not(noscript) {
       animation: rise-in linear both;
       animation-timeline: view();
-      animation-range: entry 0% cover 18%;
+      animation-range: entry 0% cover 16%;
+    }
+
+    .plate {
+      animation: fade-in linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 22%;
     }
   }
 }
 
 /* ---------- Hover and focus ---------- */
 
+a {
+  transition:
+    color 150ms ease,
+    text-decoration-color 150ms ease;
+}
+
 .site-header nav a {
-  position: relative;
   transition: color 150ms ease;
 }
 
-.site-header nav a::after,
-.button::after {
-  content: '';
-  position: absolute;
-  inset: auto 0 -6px 0;
-  height: 2px;
-  background: var(--spectrum);
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 250ms var(--ease-out);
-}
-
-.site-header nav a:hover::after,
-.site-header nav a:focus-visible::after,
-.button:hover::after,
-.button:focus-visible::after {
-  transform: scaleX(1);
-}
-
+/* The one spectral flourish outside the logo: a line drawn under the main action. */
 .button {
   position: relative;
   transition:
@@ -129,48 +127,39 @@
 }
 
 .button::after {
+  content: '';
+  position: absolute;
   inset: auto 0 -8px 0;
   height: 3px;
+  background: var(--spectrum);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 250ms var(--ease-out);
+}
+
+.button:hover::after,
+.button:focus-visible::after {
+  transform: scaleX(1);
 }
 
 .button:active {
   transform: translateY(1px);
 }
 
-a {
-  transition:
-    color 150ms ease,
-    text-decoration-color 150ms ease;
+.steps li,
+.parts li {
+  transition: border-color 200ms ease;
 }
 
-/* Steps pick up one spectral band each */
-.steps li {
+.plate-zoom {
   transition:
-    border-color 200ms ease,
-    box-shadow 200ms ease,
-    transform 200ms var(--ease-out);
-}
-
-.steps li::before {
-  transition: color 200ms ease;
-}
-
-.steps li:nth-child(5n + 1) { --accent: var(--band-1); }
-.steps li:nth-child(5n + 2) { --accent: var(--band-2); }
-.steps li:nth-child(5n + 3) { --accent: var(--band-3); }
-.steps li:nth-child(5n + 4) { --accent: var(--band-4); }
-.steps li:nth-child(5n + 5) { --accent: var(--band-5); }
-
-.sensor-table td,
-.sensor-table .tag,
-.limits li::before {
-  transition:
-    color 150ms ease,
+    background-color 150ms ease,
     border-color 150ms ease,
-    transform 200ms var(--ease-out);
+    color 150ms ease;
 }
 
-.demo-bar button {
+.demo-bar button,
+.lightbox-bar button {
   transition:
     background-color 150ms ease,
     border-color 150ms ease,
@@ -201,36 +190,13 @@ a {
   .logo:hover .logo-band-4 { animation-delay: 150ms; }
   .logo:hover .logo-band-5 { animation-delay: 200ms; }
 
-  .steps li:hover {
-    border-top-color: var(--accent);
-    box-shadow: inset 0 2px 0 var(--accent);
-    transform: translateY(-3px);
-  }
-
-  .steps li:hover::before {
-    color: var(--accent);
-  }
-
-  .sensor-table tbody tr:hover td {
-    color: var(--text);
-  }
-
-  .sensor-table tbody tr:hover .tag {
-    border-color: var(--text-muted);
-    color: var(--text);
-  }
-
-  .limits li:hover::before {
-    color: var(--text);
-    transform: translateX(4px);
+  .steps li:hover,
+  .parts li:hover {
+    border-top-color: var(--metal);
   }
 
   .demo-bar button:hover {
     transform: translateY(-1px);
-  }
-
-  .panel:hover {
-    border-color: color-mix(in srgb, var(--line), var(--text-muted) 45%);
   }
 }
 
@@ -261,6 +227,10 @@ a {
   animation: pulse 1.2s ease-in-out infinite;
 }
 
+.demo[data-playing='true'] .chart-head {
+  animation: pulse 1s ease-in-out infinite;
+}
+
 .event {
   position: relative;
   overflow: hidden;
@@ -276,25 +246,6 @@ a {
   background: var(--spectrum);
   transform-origin: left;
   animation: draw-in 800ms linear both;
-}
-
-.chart-cursor {
-  transition: opacity 150ms ease;
-}
-
-/* ---------- Monitoring ---------- */
-
-.device-led,
-.device-signal {
-  animation: pulse 1.6s ease-in-out infinite;
-}
-
-.hero-figure {
-  animation: rise-in 700ms var(--ease-out) 200ms both;
-}
-
-.demo[data-playing='true'] .chart-head {
-  animation: pulse 1s ease-in-out infinite;
 }
 
 .log li {

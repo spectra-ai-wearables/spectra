@@ -1,4 +1,5 @@
-/* Header */
+/* ---------- Header ---------- */
+
 .site-header {
   display: flex;
   flex-wrap: wrap;
@@ -29,98 +30,391 @@
   color: var(--text);
 }
 
-/* Hero */
+/* ---------- Hero ---------- */
+
 .hero {
-  padding-block: var(--space-6) var(--space-5);
+  padding-top: var(--space-6);
 }
 
 .hero h1 {
-  max-width: 22ch;
+  max-width: 17ch;
   margin-block: var(--space-3) var(--space-4);
-  font-size: var(--step-3);
-  letter-spacing: -0.02em;
+  font-size: var(--step-4);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
 }
 
 .lede {
-  max-width: var(--measure);
-  margin-bottom: var(--space-5);
+  max-width: 56ch;
   font-size: var(--step-1);
   line-height: 1.5;
   color: var(--text-muted);
 }
 
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-5);
+  margin-top: var(--space-5);
+}
+
+.text-link {
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+}
+
 .hero-note {
-  margin-top: var(--space-3);
+  margin-top: var(--space-4);
   font-family: var(--font-mono);
   font-size: var(--step--1);
   color: var(--text-muted);
 }
 
-/* The one brand flourish: five spectral bands as a hairline. */
-.hero-copy::after {
-  content: '';
-  display: block;
-  width: min(100%, 20rem);
-  height: 3px;
-  margin-top: var(--space-5);
-  background: linear-gradient(
-    90deg,
-    var(--band-1) 0 20%,
-    var(--band-2) 20% 40%,
-    var(--band-3) 40% 60%,
-    var(--band-4) 60% 80%,
-    var(--band-5) 80% 100%
-  );
+/*
+ * The render is shown wide, with its top (which repeats the logo) cropped and
+ * its edges dissolved into the page so it reads as a scene, not a card.
+ */
+.hero-stage {
+  max-width: var(--plate);
+  margin: var(--space-5) auto 0;
+  overflow: hidden;
 }
 
-/* Sections */
+.hero-stage img {
+  display: block;
+  width: 120%;
+  max-width: none;
+  height: auto;
+  margin-left: -10%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  object-position: 50% 81%;
+  -webkit-mask-image:
+    linear-gradient(to bottom, transparent, #000 16%, #000 80%, transparent),
+    linear-gradient(to right, transparent, #000 10%, #000 90%, transparent);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(to bottom, transparent, #000 16%, #000 80%, transparent),
+    linear-gradient(to right, transparent, #000 10%, #000 90%, transparent);
+  mask-composite: intersect;
+}
+
+.hero-stage figcaption {
+  padding-inline: var(--gutter);
+  text-align: center;
+}
+
+@media (min-width: 720px) {
+  .hero-stage {
+    margin-top: 0;
+  }
+
+  .hero-stage img {
+    width: 100%;
+    margin-left: 0;
+  }
+}
+
+/* Wide screens: copy and scene share the first viewport; the scene runs to the right edge. */
+@media (min-width: 1000px) {
+  .hero {
+    display: grid;
+    grid-template-columns:
+      minmax(var(--gutter), 1fr)
+      minmax(0, 29rem)
+      minmax(0, calc(var(--page) - 29rem))
+      minmax(var(--gutter), 1fr);
+    align-items: center;
+    min-height: min(44rem, calc(100svh - 5.5rem));
+    padding-top: var(--space-4);
+  }
+
+  .hero-copy {
+    grid-column: 2;
+    grid-row: 1;
+    position: relative;
+    z-index: 1;
+    width: auto;
+    margin: 0;
+  }
+
+  .hero h1 {
+    font-size: clamp(2.5rem, 3.7vw, 3.5rem);
+  }
+
+  .hero-stage {
+    grid-column: 3 / -1;
+    grid-row: 1;
+    max-width: none;
+    margin: 0 0 0 -2rem;
+  }
+
+  .hero-stage figcaption {
+    padding-left: 14%;
+    text-align: left;
+  }
+}
+
+figcaption {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  line-height: 1.6;
+  color: var(--text-muted);
+}
+
+/* ---------- Sections ---------- */
+
+/*
+ * Every section is a three-track grid: content in the middle, gutters at the
+ * sides. Plates opt into the full width with .bleed.
+ */
 .section {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  row-gap: var(--space-3);
-  padding-block: var(--space-5);
-  border-top: 1px solid var(--line);
+  grid-template-columns:
+    [full-start] minmax(var(--gutter), 1fr)
+    [content-start] minmax(0, var(--page))
+    [content-end] minmax(var(--gutter), 1fr)
+    [full-end];
+  row-gap: var(--space-4);
+  padding-block: var(--space-7);
+  position: relative;
+}
+
+.section > * {
+  grid-column: content;
+}
+
+.section > .bleed {
+  grid-column: full;
+}
+
+/* Metallic hairline between sections, fading out toward the edges. */
+.section::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--metal) 30%, var(--metal) 70%, transparent);
+  opacity: 0.45;
 }
 
 .section-title {
-  max-width: 24ch;
-  margin-bottom: var(--space-2);
-  font-size: var(--step-2);
-  letter-spacing: -0.01em;
+  max-width: 22ch;
+  font-size: var(--step-3);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
 }
 
-.section > p {
+.section-lede {
+  max-width: 48ch;
+  font-size: var(--step-1);
+  line-height: 1.5;
+}
+
+.section > p:not([class]) {
   max-width: var(--measure);
+  color: var(--text-muted);
+}
+
+.subsection-title {
+  margin-top: var(--space-5);
+  font-size: var(--step-1);
 }
 
 .source {
+  max-width: var(--measure);
   font-size: var(--step--1);
   color: var(--text-muted);
 }
 
+/* ---------- Plates: large figures ---------- */
+
+.plate {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-3);
+  margin-block: var(--space-5);
+}
+
+.plate-link {
+  position: relative;
+  display: block;
+  width: min(100%, var(--plate));
+  cursor: zoom-in;
+  text-decoration: none;
+}
+
+.plate img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Renders keep every annotation: only a hair of each edge is feathered. */
+.plate-render img {
+  -webkit-mask-image:
+    linear-gradient(to bottom, transparent, #000 1.5%, #000 98.5%, transparent),
+    linear-gradient(to right, transparent, #000 1%, #000 99%, transparent);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(to bottom, transparent, #000 1.5%, #000 98.5%, transparent),
+    linear-gradient(to right, transparent, #000 1%, #000 99%, transparent);
+  mask-composite: intersect;
+}
+
+/* Design studies sit on a band of their own navy, so they have no visible edge. */
+.plate-blueprint {
+  padding-block: var(--space-5);
+  background: linear-gradient(
+    to bottom,
+    var(--bg),
+    var(--blueprint) 9rem,
+    var(--blueprint) calc(100% - 9rem),
+    var(--bg)
+  );
+}
+
+/* On small screens the control sits under the image, so it never covers an annotation. */
+.plate-zoom {
+  display: block;
+  width: fit-content;
+  margin: var(--space-3) var(--gutter) 0 auto;
+  padding: var(--space-1) var(--space-3);
+  background: color-mix(in srgb, var(--bg) 82%, transparent);
+  border: 1px solid var(--metal);
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text);
+}
+
 @media (min-width: 900px) {
-  .section {
-    grid-template-columns: 11rem minmax(0, 1fr);
-    column-gap: var(--space-5);
-    padding-block: var(--space-6);
-  }
-
-  .section > * {
-    grid-column: 2;
-  }
-
-  .section > .eyebrow {
-    grid-column: 1;
-    padding-top: 0.6rem;
+  .plate-zoom {
+    position: absolute;
+    top: var(--space-2);
+    left: var(--space-2);
+    margin: 0;
   }
 }
 
-/* Numbered steps */
+.plate-link:hover .plate-zoom,
+.plate-link:focus-visible .plate-zoom {
+  background: var(--text);
+  border-color: var(--text);
+  color: var(--bg);
+}
+
+.plate figcaption {
+  width: min(100% - 2 * var(--gutter), var(--page));
+  max-width: var(--page);
+}
+
+/* ---------- Enlarged view ---------- */
+
+.lightbox {
+  width: 100vw;
+  max-width: 100vw;
+  height: 100dvh;
+  max-height: 100dvh;
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  border: 0;
+  color: var(--text);
+}
+
+.lightbox[open] {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+}
+
+.lightbox::backdrop {
+  background: var(--bg);
+}
+
+.lightbox-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--gutter);
+  border-bottom: 1px solid var(--line);
+}
+
+.lightbox-bar h2 {
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  font-weight: 400;
+  letter-spacing: 0.04em;
+}
+
+.lightbox-bar button {
+  min-height: 2.5rem;
+  padding: var(--space-2) var(--space-4);
+  background: var(--surface-raised);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  font-size: var(--step--1);
+  cursor: pointer;
+}
+
+.lightbox-bar button:hover {
+  border-color: var(--text-muted);
+}
+
+.lightbox-stage {
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+/* Never smaller than a legible size: on a phone the image pans instead of shrinking. */
+.lightbox-stage img {
+  display: block;
+  width: max(100%, 1280px);
+  max-width: none;
+  height: auto;
+  margin-inline: auto;
+}
+
+/* ---------- Component lists ---------- */
+
+.parts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
+  gap: var(--space-4) var(--space-5);
+  list-style: none;
+}
+
+.parts li {
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--line);
+}
+
+.part-index {
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  color: var(--text-muted);
+}
+
+.parts h3 {
+  margin-block: var(--space-1) var(--space-2);
+  font-size: var(--step-0);
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.parts li > p:last-child {
+  font-size: var(--step--1);
+  color: var(--text-muted);
+}
+
+/* ---------- Numbered steps ---------- */
+
 .steps {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
-  gap: var(--space-4);
-  margin-block: var(--space-3);
+  gap: var(--space-4) var(--space-5);
   list-style: none;
   counter-reset: step;
 }
@@ -140,9 +434,11 @@
   color: var(--text-muted);
 }
 
-.steps h3 {
+.steps :is(h3, h4) {
   margin-bottom: var(--space-2);
   font-size: var(--step-0);
+  font-weight: 600;
+  line-height: 1.4;
 }
 
 .steps p {
@@ -150,51 +446,8 @@
   color: var(--text-muted);
 }
 
-/* Product design vs. what the demo runs */
-.status {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
-  gap: var(--space-3);
-}
+/* ---------- Evaluation table ---------- */
 
-.status-card {
-  display: grid;
-  align-content: start;
-  gap: var(--space-2);
-  padding: var(--space-4);
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-}
-
-.status-card:last-child:not(:first-child) {
-  background: transparent;
-  border-style: dashed;
-}
-
-.status-label {
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-}
-
-.status-card h3 {
-  font-size: var(--step-1);
-}
-
-.status-card p:last-child {
-  font-size: var(--step--1);
-  color: var(--text-muted);
-}
-
-.subsection-title {
-  margin-top: var(--space-4);
-  font-size: var(--step-1);
-}
-
-/* Evaluation table */
 .eval-table {
   width: 100%;
   border-collapse: collapse;
@@ -216,13 +469,13 @@
   vertical-align: top;
 }
 
+.eval-table tbody th {
+  font-weight: 600;
+}
+
 .eval-table td {
   font-family: var(--font-mono);
   font-size: var(--step--1);
-}
-
-.eval-table td:last-child {
-  color: var(--text);
 }
 
 .eval-table td:nth-child(2) {
@@ -270,85 +523,51 @@
   }
 }
 
-/* Sensor table */
-.sensor-table {
-  width: 100%;
-  margin-block: var(--space-3);
-  border-collapse: collapse;
-  text-align: left;
+/* ---------- Status and limits ---------- */
+
+.status {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+  gap: var(--space-5);
 }
 
-.sensor-table thead th {
-  padding-bottom: var(--space-2);
+.status-col {
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--metal);
+}
+
+.status-col:first-child {
+  border-top-style: dashed;
+}
+
+.status-col h3 {
+  margin-bottom: var(--space-3);
   font-family: var(--font-mono);
   font-size: var(--step--1);
-  font-weight: 400;
-  color: var(--text-muted);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
-.sensor-table tbody th,
-.sensor-table td {
-  padding: var(--space-3) var(--space-4) var(--space-3) 0;
-  border-top: 1px solid var(--line);
-  vertical-align: top;
-}
-
-.sensor-table tbody th {
-  width: 40%;
-}
-
-.sensor-table td {
-  color: var(--text-muted);
-}
-
-@media (max-width: 600px) {
-  .sensor-table,
-  .sensor-table tbody,
-  .sensor-table tr,
-  .sensor-table tbody th,
-  .sensor-table td {
-    display: block;
-    width: auto;
-  }
-
-  .sensor-table thead {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-  }
-
-  .sensor-table tr {
-    padding-block: var(--space-3);
-    border-top: 1px solid var(--line);
-  }
-
-  .sensor-table tbody th,
-  .sensor-table td {
-    padding: 0;
-    border: 0;
-  }
-
-  .sensor-table td {
-    margin-top: var(--space-1);
-  }
-}
-
-/* Limits: same visual weight as every other section */
+.status-col ul,
 .limits {
   display: grid;
-  gap: 0;
-  max-width: var(--measure);
   list-style: none;
 }
 
+.status-col li,
 .limits li {
   position: relative;
   padding: var(--space-3) 0 var(--space-3) var(--space-4);
   border-top: 1px solid var(--line);
+  color: var(--text-muted);
 }
 
+.status-col li:first-child {
+  border-top: 0;
+}
+
+.status-col li::before,
 .limits li::before {
   content: '—';
   position: absolute;
@@ -357,16 +576,17 @@
   color: var(--text-muted);
 }
 
-/* Team */
+.limits {
+  max-width: var(--measure);
+}
+
+/* ---------- Team ---------- */
+
 .team ul {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-2) var(--space-4);
+  gap: var(--space-2) var(--space-5);
   list-style: none;
   font-family: var(--font-mono);
   font-size: var(--step--1);
-}
-
-.team {
-  padding-bottom: var(--space-6);
 }

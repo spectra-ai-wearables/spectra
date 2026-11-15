@@ -13,21 +13,20 @@ function outcome(alerts: number, sessions: number, medianDelay: number | null, a
   return `Caught ${alerts} of ${sessions}${delay}`;
 }
 ---
-<section class="section" id="analysis">
-  <p class="eyebrow">On-board AI</p>
+<section class="section" id="model">
+  <p class="eyebrow">04 / Model</p>
   <h2 class="section-title">Machine learning that runs where the astronaut is.</h2>
-  <p>
-    The multispectral sensor on the astronaut's wearable streams its readings to a server
-    on board the spacecraft. There, a machine-learning model learns that astronaut's own
-    patterns and reads every new window against them. Nothing has to reach Earth for an
-    answer to come back.
+  <p class="section-lede">
+    The model learns one astronaut's own response to an activity and reads every new window
+    against it. Three questions, asked in order.
   </p>
+
   <ol class="steps">
     <li>
       <h3>Can this reading be trusted?</h3>
       <p>
         Lost contact, missing data and motion are detected first. An unreliable window is
-        never scored; the astronaut is asked to adjust the sensor and measure again.
+        never scored; the astronaut is asked to adjust the band and measure again.
       </p>
     </li>
     <li>
@@ -48,26 +47,12 @@ function outcome(alerts: number, sessions: number, medianDelay: number | null, a
     </li>
   </ol>
 
-  <div class="status">
-    <div class="status-card">
-      <p class="status-label">Running in this demo</p>
-      <h3>A small neural network</h3>
-      <p>
-        Two hidden layers and {training.parameters} parameters, trained beforehand
-        on {training.sessions} synthetic sessions of normal recovery and run in your browser
-        for inference only. Its inputs are heart rate and skin temperature.
-      </p>
-    </div>
-    <div class="status-card">
-      <p class="status-label">Designed for the product</p>
-      <h3>The same model, on the spacecraft</h3>
-      <p>
-        Trained on each astronaut's measured reference sessions and run on the on-board
-        server. Motion and the multispectral channels become inputs once measured data
-        shows they help; we have not tested that yet.
-      </p>
-    </div>
-  </div>
+  <p>
+    The model in the demo has two hidden layers and {training.parameters} parameters. It was
+    trained beforehand on {training.sessions} synthetic sessions of normal recovery and runs
+    in your browser for inference only. Its inputs are heart rate and skin temperature; the
+    multispectral channels are not used yet.
+  </p>
 
   <h3 class="subsection-title">Does the model add anything?</h3>
   <p>

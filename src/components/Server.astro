@@ -1,0 +1,87 @@
+---
+import architecture from '../assets/server-architecture.png';
+import design from '../assets/server-design.png';
+import Plate from './Plate.astro';
+
+const parts = [
+  { name: 'Aluminum enclosure', role: 'Compact, durable housing for the compute board.' },
+  { name: 'Thermal spreader', role: 'Distributes heat from the compute board for quiet, stable operation.' },
+  { name: 'Raspberry Pi compute board', role: 'Single-board computer for onboard data processing and control.' },
+  { name: 'Local storage', role: 'Solid-state storage for data, models and event buffering.' },
+  { name: 'Wireless antenna', role: 'Sits behind an RF window for local wireless links, such as Wi-Fi or Bluetooth LE.' },
+  { name: 'Power and network I/O', role: 'Recessed connectors for power and wired networking.' },
+];
+
+const pipeline = [
+  {
+    name: 'Quality check',
+    text: 'Each window of readings is checked for skin contact, missing data and motion. An unreliable window is never scored.',
+  },
+  {
+    name: 'Local ML inference',
+    text: 'A model compares reliable windows with the astronaut’s own pattern. This runs on the server, so it needs no link to Earth.',
+  },
+  {
+    name: 'Event buffer',
+    text: 'When a deviation persists, an event is written to local storage. Events are kept in order and wait there while the link is down.',
+  },
+  {
+    name: 'Earth sync',
+    text: 'The server hands queued events to the spacecraft’s communication system. They reach the ground team when that link allows, with its delay.',
+  },
+];
+---
+<section class="section" id="server">
+  <p class="eyebrow">02 / Onboard server</p>
+  <h2 class="section-title">Local analysis continues when the Earth link is unavailable.</h2>
+  <p class="section-lede">
+    The server is where readings become answers. It sits on the spacecraft, next to the
+    astronaut, not on the ground.
+  </p>
+  <p>
+    A Raspberry Pi single-board computer in a sealed aluminum enclosure receives the
+    wristband's readings over a local wireless link. It runs the analysis, keeps a bounded
+    history and stores events. It does not talk to Earth by itself: Earth sync uses
+    spacecraft communications, whenever the mission has a link.
+  </p>
+
+  <Plate
+    image={architecture}
+    variant="render"
+    title="Onboard server: compute architecture"
+    alt="Exploded view of the onboard server: enclosure lid, thermal spreader, Raspberry Pi board, storage module and base with connectors, above a four-step flow from quality check to Earth sync. The components and steps are described in the lists that follow."
+  >
+    Exploded view. Proposed component layout.
+  </Plate>
+
+  <ol class="parts">
+    {parts.map((part, i) => (
+      <li>
+        <p class="part-index">{String(i + 1).padStart(2, '0')}</p>
+        <h3>{part.name}</h3>
+        <p>{part.role}</p>
+      </li>
+    ))}
+  </ol>
+
+  <h3 class="subsection-title">From a reading to the ground team</h3>
+  <ol class="steps">
+    {pipeline.map((step) => (
+      <li>
+        <h4>{step.name}</h4>
+        <p>{step.text}</p>
+      </li>
+    ))}
+  </ol>
+
+  <Plate
+    image={design}
+    variant="blueprint"
+    title="Onboard server: design study"
+    alt="Design study of the onboard server with top, front, rear and isometric views, and a section showing the internal layout."
+  >
+    Design study: top, front, rear and isometric views, with a section through the internal
+    layout. Called out: aluminum enclosure, thermal spreader, Raspberry Pi board, storage,
+    antenna behind the RF window, power and network ports.
+  </Plate>
+</section>

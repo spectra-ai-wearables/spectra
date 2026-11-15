@@ -11,12 +11,6 @@
   margin-top: var(--space-3);
 }
 
-@media (min-width: 900px) {
-  .demo-section > .demo {
-    grid-column: 1 / -1;
-  }
-}
-
 .demo:fullscreen {
   align-content: start;
   padding: var(--space-4);

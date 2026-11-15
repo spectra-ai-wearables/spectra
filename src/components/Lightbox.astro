@@ -1,0 +1,36 @@
+<dialog class="lightbox" data-lightbox aria-labelledby="lightbox-title">
+  <header class="lightbox-bar">
+    <h2 id="lightbox-title" data-lightbox-title></h2>
+    <button type="button" data-lightbox-close>Close</button>
+  </header>
+  <div class="lightbox-stage" data-lightbox-stage tabindex="0" role="group" aria-label="Enlarged image. Scroll to pan.">
+    <img data-lightbox-image alt="" />
+  </div>
+</dialog>
+
+<script>
+  const dialog = document.querySelector<HTMLDialogElement>('[data-lightbox]');
+
+  // Without <dialog> support the links simply open the full image.
+  if (dialog && typeof dialog.showModal === 'function') {
+    const image = dialog.querySelector<HTMLImageElement>('[data-lightbox-image]')!;
+    const title = dialog.querySelector<HTMLElement>('[data-lightbox-title]')!;
+    const stage = dialog.querySelector<HTMLElement>('[data-lightbox-stage]')!;
+
+    document.addEventListener('click', (event) => {
+      const link = (event.target as Element).closest<HTMLAnchorElement>('a[data-enlarge]');
+      if (!link) return;
+      event.preventDefault();
+      image.src = link.href;
+      image.alt = link.querySelector('img')?.alt ?? '';
+      title.textContent = link.dataset.title ?? '';
+      dialog.showModal();
+      stage.scrollTo(0, 0);
+    });
+
+    dialog.addEventListener('click', (event) => {
+      const target = event.target as Element;
+      if (target === dialog || target.closest('[data-lightbox-close]')) dialog.close();
+    });
+  }
+</script>

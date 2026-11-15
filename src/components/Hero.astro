@@ -7,35 +7,40 @@ import Logo from './Logo.astro';
 <header class="site-header">
   <a href={home} aria-label="Spectra home"><Logo /></a>
   <nav aria-label="Sections">
-    <a href="#how">How it works</a>
+    <a href="#wristband">Wristband</a>
+    <a href="#server">Onboard server</a>
     <a href="#demo">Demo</a>
-    <a href="#wearable">Wearable</a>
-    <a href="#analysis">On-board AI</a>
-    <a href="#limits">Limits</a>
+    <a href="#model">Model</a>
+    <a href="#status">Status</a>
     <a href="#team">Team</a>
   </nav>
 </header>
 
 <section class="hero">
   <div class="hero-copy">
-    <p class="eyebrow">On-board AI health monitoring for astronauts</p>
+    <p class="eyebrow">On-board health monitoring for astronauts</p>
     <h1>Turn body signals into information astronauts can use on board.</h1>
     <p class="lede">
-      Spectra pairs a multispectral wearable with machine learning designed to run on the
-      spacecraft. It checks whether a reading can be trusted, compares it with the astronaut's
-      own pattern, and explains what changed, with or without a link to Earth.
+      Spectra pairs a screenless multispectral wristband with a compact onboard server.
+      Readings are checked and analyzed on the spacecraft, and events wait in a queue until
+      spacecraft communications can carry them to Earth.
     </p>
-    <a class="button" href="#demo">Run the demo</a>
-    <p class="hero-note">Hackathon prototype. The demo runs on synthetic data.</p>
+    <div class="hero-actions">
+      <a class="button" href="#demo">Run the demo</a>
+      <a class="text-link" href="#wristband">See the hardware</a>
+    </div>
+    <p class="hero-note">Proposed hardware and model. The demo runs on synthetic data.</p>
   </div>
-  <figure class="hero-figure">
+  <figure class="hero-stage">
     <Image
       src={gadget}
-      alt="The Spectra band, a screenless wristband with optical sensors on its inner face, next to the compact on-board server."
-      widths={[480, 960, 1536]}
-      sizes="(min-width: 900px) 34rem, 100vw"
+      alt="The Spectra wristband, a screenless titanium-colored band with optical sensors on its inner face, standing beside the compact onboard server."
+      widths={[640, 960, 1280, 1536]}
+      sizes="(min-width: 1536px) 1536px, 120vw"
       loading="eager"
+      fetchpriority="high"
+      quality={82}
     />
-    <figcaption>Concept render: the band and the on-board server.</figcaption>
+    <figcaption>Concept render: the wristband and the onboard server.</figcaption>
   </figure>
 </section>

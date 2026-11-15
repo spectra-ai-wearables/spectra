@@ -13,12 +13,12 @@ const gridY = (hr: number) =>
   CHART.top + (1 - (hr - CHART.minHr) / (CHART.maxHr - CHART.minHr)) * (plotBottom - CHART.top);
 ---
 <section class="section demo-section" id="demo">
-  <p class="eyebrow">Live demo</p>
+  <p class="eyebrow">03 / Live demo</p>
   <h2 class="section-title">Run a session and watch both sides.</h2>
   <p>
     Pick a scenario. The astronaut panel shows what Spectra tells the crew member; the
     ground panel shows what reaches mission control, and when. The state shown comes from
-    the <a href="#analysis">on-board model</a>, a small neural network running in your browser;
+    the <a href="#model">on-board model</a>, a small neural network running in your browser;
     the statistical baseline runs beside it for comparison.
   </p>
 

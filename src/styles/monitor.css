@@ -16,27 +16,25 @@
 }
 
 .hero-figure {
-  display: none;
+  display: grid;
+  gap: var(--space-2);
+}
+
+.hero-figure img,
+.gadget-photo {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.hero-figure img {
+  display: block;
+  width: 100%;
+  height: auto;
 }
 
 @media (min-width: 900px) {
   .hero {
-    grid-template-columns: minmax(0, 1fr) 20rem;
-  }
-
-  .hero-figure {
-    display: grid;
-    justify-items: center;
-    gap: var(--space-3);
-    padding: var(--space-4);
-    background-image: var(--grid);
-    background-size: 24px 24px;
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-  }
-
-  .hero-figure .device {
-    width: 13rem;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 30rem);
   }
 }
 
@@ -55,12 +53,6 @@ figcaption {
   overflow: visible;
 }
 
-.device-band {
-  fill: var(--surface);
-  stroke: var(--line);
-  stroke-width: 1.5;
-}
-
 .device-case {
   fill: var(--surface-raised);
   stroke: var(--text-muted);
@@ -68,68 +60,21 @@ figcaption {
   stroke-linejoin: round;
 }
 
-.device-screen,
-.device-glass {
+.device-screen {
   fill: var(--bg);
   stroke: var(--line);
   stroke-width: 1;
 }
 
-.device-glass {
-  stroke: var(--text-muted);
-}
-
-.device-crown,
 .device-pin {
   fill: var(--text-muted);
 }
 
-.device-detail,
-.device-dashed,
-.device-leader {
+.device-detail {
   fill: none;
   stroke: var(--text-muted);
   stroke-width: 1;
   stroke-linecap: round;
-}
-
-.device-dashed {
-  stroke-dasharray: 3 3;
-}
-
-.device-label {
-  fill: var(--text-muted);
-  font-family: var(--font-mono);
-  font-size: 11px;
-}
-
-.device-value {
-  fill: var(--text);
-  font-family: var(--font-mono);
-  font-size: 34px;
-  font-weight: 500;
-}
-
-.device-trace {
-  fill: none;
-  stroke: var(--state-ok);
-  stroke-width: 2;
-  stroke-linejoin: round;
-  stroke-linecap: round;
-}
-
-.device-marker circle {
-  fill: var(--bg);
-  stroke: var(--text);
-  stroke-width: 1;
-}
-
-.device-marker text {
-  fill: var(--text);
-  font-family: var(--font-mono);
-  font-size: 10px;
-  text-anchor: middle;
-  dominant-baseline: central;
 }
 
 /* ---------- Wearable figure ---------- */
@@ -145,61 +90,42 @@ figcaption {
   border-radius: var(--radius);
 }
 
-.gadget-views {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-3);
-  padding: var(--space-3);
-  background-image: var(--grid);
-  background-size: 24px 24px;
-  border-radius: var(--radius);
+/* A close crop of the render, centered on the sensors inside the band. */
+.gadget-photo {
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
 }
 
-.gadget-view {
-  display: grid;
-  justify-items: center;
-  gap: var(--space-2);
-}
-
-.gadget-view .device {
-  max-width: 11rem;
-}
-
-.gadget-view p {
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  color: var(--text-muted);
+.gadget-photo img {
+  display: block;
+  width: 230%;
+  max-width: none;
+  height: auto;
+  margin-left: -26%;
+  margin-top: -39%;
 }
 
 .gadget-legend {
   display: grid;
   gap: var(--space-3);
   list-style: none;
-  counter-reset: part;
   font-size: var(--step--1);
   color: var(--text-muted);
 }
 
 .gadget-legend li {
   position: relative;
-  padding-left: 2.25rem;
-  counter-increment: part;
+  padding-left: 1.25rem;
 }
 
 .gadget-legend li::before {
-  content: counter(part);
+  content: '';
   position: absolute;
   left: 0;
-  top: 0;
-  display: grid;
-  place-items: center;
-  width: 1.5rem;
-  height: 1.5rem;
-  border: 1px solid var(--text);
-  border-radius: 50%;
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  color: var(--text);
+  top: 0.55em;
+  width: 6px;
+  height: 6px;
+  background: var(--text-muted);
 }
 
 .gadget-legend strong {
@@ -246,11 +172,6 @@ figcaption {
   display: grid;
   place-items: center;
   width: 9rem;
-  height: 7rem;
-}
-
-.system-art-watch .device {
-  width: auto;
   height: 7rem;
 }
 

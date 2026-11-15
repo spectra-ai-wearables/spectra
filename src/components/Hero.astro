@@ -1,6 +1,7 @@
 ---
+import { Image } from 'astro:assets';
+import gadget from '../assets/gadget.jpeg';
 import { home } from '../site';
-import WatchFront from './figures/WatchFront.astro';
 import Logo from './Logo.astro';
 ---
 <header class="site-header">
@@ -28,7 +29,13 @@ import Logo from './Logo.astro';
     <p class="hero-note">Hackathon prototype. The demo runs on synthetic data.</p>
   </div>
   <figure class="hero-figure">
-    <WatchFront />
-    <figcaption>Concept illustration</figcaption>
+    <Image
+      src={gadget}
+      alt="The Spectra band, a screenless wristband with optical sensors on its inner face, next to the compact on-board server."
+      widths={[480, 960, 1536]}
+      sizes="(min-width: 900px) 34rem, 100vw"
+      loading="eager"
+    />
+    <figcaption>Concept render: the band and the on-board server.</figcaption>
   </figure>
 </section>

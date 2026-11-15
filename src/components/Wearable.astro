@@ -1,6 +1,6 @@
 ---
-import WatchBack from './figures/WatchBack.astro';
-import WatchFront from './figures/WatchFront.astro';
+import { Image } from 'astro:assets';
+import gadget from '../assets/gadget.jpeg';
 
 const sensors = [
   {
@@ -34,17 +34,22 @@ const sensors = [
   <p class="eyebrow">The wearable</p>
   <h2 class="section-title">Each sensor has one job.</h2>
   <figure class="gadget">
-    <div class="gadget-views">
-      <div class="gadget-view"><WatchFront /><p>Front</p></div>
-      <div class="gadget-view"><WatchBack /><p>Back, against the skin</p></div>
+    <div class="gadget-photo">
+      <Image
+        src={gadget}
+        alt="Close view of the inner face of the Spectra band: two green emitters, a central optical sensor and a metal contact pad."
+        widths={[960, 1536]}
+        sizes="(min-width: 720px) 60rem, 230vw"
+      />
     </div>
-    <ol class="gadget-legend">
-      <li><strong>Accelerometer</strong> inside the case, for movement and reading quality.</li>
-      <li><strong>Multispectral ring</strong>, eight bands from 415 to 680 nm. <span class="tag">Experimental</span></li>
-      <li><strong>Optical pulse sensor</strong>, two emitters and a photodiode.</li>
+    <ul class="gadget-legend">
+      <li><strong>Optical pulse sensor</strong> on the inner face, against the skin.</li>
+      <li><strong>Multispectral sensor</strong>, eight bands from 415 to 680 nm. <span class="tag">Experimental</span></li>
       <li><strong>Contact pad</strong> for skin temperature.</li>
-    </ol>
-    <figcaption>Concept illustration. The prototype hardware is not built yet.</figcaption>
+      <li><strong>Accelerometer</strong> inside the band, for movement and reading quality.</li>
+      <li><strong>No screen.</strong> The astronaut reads the dashboard on a separate display.</li>
+    </ul>
+    <figcaption>Concept render of the band's inner face.</figcaption>
   </figure>
   <table class="sensor-table">
     <thead>

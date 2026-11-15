@@ -1,6 +1,12 @@
 <section class="section" id="analysis">
-  <p class="eyebrow">On-board analysis</p>
-  <h2 class="section-title">Three questions, asked in order.</h2>
+  <p class="eyebrow">On-board AI</p>
+  <h2 class="section-title">Machine learning that runs where the astronaut is.</h2>
+  <p>
+    The multispectral sensor on the astronaut's wearable streams its readings to a server
+    on board the spacecraft. There, a machine-learning model learns that astronaut's own
+    patterns and reads every new window against them. Nothing has to reach Earth for an
+    answer to come back.
+  </p>
   <ol class="steps">
     <li>
       <h3>Can this reading be trusted?</h3>
@@ -26,10 +32,25 @@
       </p>
     </li>
   </ol>
-  <p>
-    This prototype uses a statistical baseline: a robust deviation score with a persistence
-    rule. A lightweight anomaly-detection model, trained beforehand and run on the
-    microcontroller for inference only, is the next step. The statistical baseline is what
-    it would have to beat.
-  </p>
+  <div class="status">
+    <div class="status-card">
+      <p class="status-label">Designed for the product</p>
+      <h3>A compact anomaly-detection model</h3>
+      <p>
+        A small neural network, trained beforehand on each astronaut's reference sessions
+        and run on the on-board server for inference only. It takes pulse, motion, skin
+        temperature and the multispectral channels together, so it can learn patterns no
+        single threshold captures.
+      </p>
+    </div>
+    <div class="status-card">
+      <p class="status-label">Running in this demo</p>
+      <h3>A statistical baseline</h3>
+      <p>
+        A robust deviation score with a persistence rule, computed in your browser on
+        synthetic data. No trained model runs on this page. The baseline is the benchmark
+        the model has to beat.
+      </p>
+    </div>
+  </div>
 </section>

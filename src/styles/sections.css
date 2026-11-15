@@ -150,6 +150,45 @@
   color: var(--text-muted);
 }
 
+/* Product design vs. what the demo runs */
+.status {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+  gap: var(--space-3);
+}
+
+.status-card {
+  display: grid;
+  align-content: start;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.status-card:last-child {
+  background: transparent;
+  border-style: dashed;
+}
+
+.status-label {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.status-card h3 {
+  font-size: var(--step-1);
+}
+
+.status-card p:last-child {
+  font-size: var(--step--1);
+  color: var(--text-muted);
+}
+
 /* Sensor table */
 .sensor-table {
   width: 100%;

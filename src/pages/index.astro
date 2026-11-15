@@ -1,12 +1,21 @@
 ---
+import Analysis from '../components/Analysis.astro';
+import Hero from '../components/Hero.astro';
+import HowItWorks from '../components/HowItWorks.astro';
+import Limits from '../components/Limits.astro';
+import Problem from '../components/Problem.astro';
+import Team from '../components/Team.astro';
+import Wearable from '../components/Wearable.astro';
+import Base from '../layouts/Base.astro';
 ---
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Spectra</title>
-  </head>
-  <body>
-    <h1>Spectra</h1>
-  </body>
-</html>
+<Base>
+  <Hero />
+  <main id="main">
+    <Problem />
+    <HowItWorks />
+    <Wearable />
+    <Analysis />
+    <Limits />
+    <Team />
+  </main>
+</Base>

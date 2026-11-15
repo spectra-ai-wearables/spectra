@@ -1,0 +1,14 @@
+---
+import { site } from '../site';
+---
+<section class="section team" id="team">
+  <p class="eyebrow">Team</p>
+  <h2 class="section-title">Built for the NASA hackathon.</h2>
+  <p>Get in touch to introduce yourself or to ask about the prototype.</p>
+  <ul>
+    {site.emails.map((email) => (
+      <li><a href={`mailto:${email}`}>{email}</a></li>
+    ))}
+    <li><a href={site.repoUrl} rel="noopener">Source code on GitHub</a></li>
+  </ul>
+</section>

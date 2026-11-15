@@ -1,0 +1,28 @@
+---
+interface Props {
+  size?: number;
+}
+const { size = 28 } = Astro.props;
+const bars = [
+  { x: 2, height: 10 },
+  { x: 8, height: 18 },
+  { x: 14, height: 26 },
+  { x: 20, height: 20 },
+  { x: 26, height: 12 },
+];
+---
+<span class="logo">
+  <svg class="logo-mark" width={size} height={size} viewBox="0 0 32 32" aria-hidden="true">
+    {bars.map((bar, i) => (
+      <rect
+        class={`logo-band logo-band-${i + 1}`}
+        x={bar.x}
+        y={29 - bar.height}
+        width="4"
+        height={bar.height}
+        rx="2"
+      />
+    ))}
+  </svg>
+  <span class="logo-word">Spectra</span>
+</span>

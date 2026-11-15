@@ -1,0 +1,56 @@
+---
+const sensors = [
+  {
+    name: 'Optical pulse sensor',
+    role: 'Captures the pulse wave and estimates heart rate.',
+    tag: null,
+  },
+  {
+    name: 'Multispectral sensor',
+    role: 'Records the optical response across several wavelength bands. We are investigating whether the extra bands help recognize unreliable readings.',
+    tag: 'Experimental',
+  },
+  {
+    name: 'Accelerometer',
+    role: 'Records movement and helps identify readings affected by motion.',
+    tag: null,
+  },
+  {
+    name: 'Contact temperature sensor',
+    role: 'Tracks the trend of skin temperature. It is not core body temperature.',
+    tag: 'Skin temperature',
+  },
+  {
+    name: 'In-app check-in',
+    role: 'Perceived effort, sleep and well-being, reported by the astronaut.',
+    tag: 'Self-reported',
+  },
+];
+---
+<section class="section" id="wearable">
+  <p class="eyebrow">The wearable</p>
+  <h2 class="section-title">Each sensor has one job.</h2>
+  <table class="sensor-table">
+    <thead>
+      <tr>
+        <th scope="col">Component</th>
+        <th scope="col">Role in Spectra</th>
+      </tr>
+    </thead>
+    <tbody>
+      {sensors.map((sensor) => (
+        <tr>
+          <th scope="row">
+            {sensor.name}
+            {sensor.tag && <span class="tag">{sensor.tag}</span>}
+          </th>
+          <td>{sensor.role}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+  <p>
+    A multispectral sensor measures the spectral content of light. That alone does not make
+    it a validated measure of glucose, hydration or disease, and Spectra does not claim it is.
+  </p>
+</section>

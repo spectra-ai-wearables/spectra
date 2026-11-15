@@ -1,0 +1,35 @@
+<section class="section" id="analysis">
+  <p class="eyebrow">On-board analysis</p>
+  <h2 class="section-title">Three questions, asked in order.</h2>
+  <ol class="steps">
+    <li>
+      <h3>Can this reading be trusted?</h3>
+      <p>
+        Lost contact, missing data and motion are detected first. An unreliable window is
+        never analyzed; the astronaut is asked to adjust the sensor and measure again.
+      </p>
+    </li>
+    <li>
+      <h3>How does it compare with this person?</h3>
+      <p>
+        Readings are compared with the astronaut's own reference for the current activity:
+        rest, exercise or recovery. The demo uses a demonstration reference; an operational
+        baseline requires longitudinal data.
+      </p>
+    </li>
+    <li>
+      <h3>Does the change persist?</h3>
+      <p>
+        A single odd reading is not an alert. Spectra asks for verification only when a
+        deviation holds across consecutive windows, and it says which signal changed and
+        for how long.
+      </p>
+    </li>
+  </ol>
+  <p>
+    This prototype uses a statistical baseline: a robust deviation score with a persistence
+    rule. A lightweight anomaly-detection model, trained beforehand and run on the
+    microcontroller for inference only, is the next step. The statistical baseline is what
+    it would have to beat.
+  </p>
+</section>

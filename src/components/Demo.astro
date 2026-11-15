@@ -1,0 +1,120 @@
+---
+import { CHART, PHASE_MARKS, xAt } from '../demo/chart';
+import { SPECTRAL_BANDS_NM } from '../sim/generator';
+
+const scenarios = [
+  { id: 'usual', label: 'Usual recovery' },
+  { id: 'misplaced', label: 'Sensor misplaced' },
+  { id: 'atypical', label: 'Atypical recovery, no link' },
+];
+const gridHr = [60, 100, 140];
+const plotBottom = CHART.height - CHART.bottom;
+const gridY = (hr: number) =>
+  CHART.top + (1 - (hr - CHART.minHr) / (CHART.maxHr - CHART.minHr)) * (plotBottom - CHART.top);
+---
+<section class="section demo-section" id="demo">
+  <p class="eyebrow">Live demo</p>
+  <h2 class="section-title">Run a session and watch both sides.</h2>
+  <p>
+    Pick a scenario. The astronaut panel shows what Spectra tells the crew member; the
+    ground panel shows what reaches mission control, and when.
+  </p>
+
+  <noscript>
+    <p class="demo-fallback">
+      The interactive demo needs JavaScript. Everything else on this page works without it.
+    </p>
+  </noscript>
+
+  <div class="demo" data-demo hidden>
+    <div class="demo-bar">
+      <div class="demo-scenarios" role="group" aria-label="Scenario">
+        {scenarios.map((scenario) => (
+          <button type="button" data-scenario={scenario.id} aria-pressed="false">
+            {scenario.label}
+          </button>
+        ))}
+      </div>
+      <div class="demo-controls">
+        <button type="button" data-play>Play</button>
+        <button type="button" data-reset>Reset</button>
+        <button type="button" role="switch" aria-checked="true" data-link>
+          Link to Earth
+        </button>
+        <button type="button" data-fullscreen>Full screen</button>
+      </div>
+      <p class="demo-badge">Synthetic data</p>
+    </div>
+
+    <div class="demo-panels">
+      <article class="panel panel-astronaut" aria-labelledby="panel-astronaut-title">
+        <header class="panel-header">
+          <h3 id="panel-astronaut-title">Astronaut dashboard</h3>
+          <p class="panel-meta">
+            <span data-phase>Rest</span> · <span data-clock>00:00</span>
+          </p>
+        </header>
+
+        <div class="reading" data-reading data-state="idle" aria-live="polite">
+          <p class="reading-label" data-label>Collecting the first window</p>
+          <p class="reading-detail" data-detail>Press play to start the session.</p>
+          <p class="reading-action"><strong>Next:</strong> <span data-action>—</span></p>
+        </div>
+
+        <figure class="chart">
+          <svg viewBox={`0 0 ${CHART.width} ${CHART.height}`} role="img"
+            aria-label="Heart rate over the session against the individual baseline band">
+            {gridHr.map((hr) => (
+              <g class="chart-grid">
+                <line x1={CHART.left} x2={CHART.width - CHART.right} y1={gridY(hr)} y2={gridY(hr)} />
+                <text x={CHART.left - 6} y={gridY(hr)} text-anchor="end" dominant-baseline="middle">{hr}</text>
+              </g>
+            ))}
+            {PHASE_MARKS.map((mark) => (
+              <g class="chart-phase">
+                <line x1={xAt(mark.t)} x2={xAt(mark.t)} y1={CHART.top} y2={plotBottom} />
+                <text x={xAt(mark.t) + 4} y={CHART.height - 8}>{mark.label}</text>
+              </g>
+            ))}
+            <path class="chart-band" data-band d="" />
+            <path class="chart-line" data-line d="" fill="none" />
+            <line class="chart-cursor" data-cursor x1={CHART.left} x2={CHART.left} y1={CHART.top} y2={plotBottom} />
+          </svg>
+          <figcaption>Heart rate (bpm). Shaded band: this astronaut's reference for the activity.</figcaption>
+        </figure>
+
+        <dl class="metrics">
+          <div><dt>Heart rate</dt><dd><span data-hr>—</span> <small>bpm</small></dd></div>
+          <div><dt>Skin temperature</dt><dd><span data-temp>—</span> <small>°C</small></dd></div>
+          <div><dt>Signal quality</dt><dd data-quality>—</dd></div>
+        </dl>
+
+        <div class="spectral">
+          <p class="spectral-title">Spectral channels <span class="tag">Experimental</span></p>
+          <ul class="spectral-bars">
+            {SPECTRAL_BANDS_NM.map((nm) => (
+              <li data-bar style="--level: 0">
+                <span class="spectral-bar" aria-hidden="true"></span>
+                <span class="spectral-nm">{nm}</span>
+              </li>
+            ))}
+          </ul>
+          <p class="spectral-note">Wavelength in nm. Shown as collected; no health indicator is derived from these channels.</p>
+        </div>
+      </article>
+
+      <article class="panel panel-ground" aria-labelledby="panel-ground-title">
+        <header class="panel-header">
+          <h3 id="panel-ground-title">Ground team</h3>
+          <p class="link-status" data-link-status data-connected="true">Link up</p>
+        </header>
+        <p class="events-empty" data-empty>No events received.</p>
+        <ol class="events" data-events aria-live="polite"></ol>
+      </article>
+    </div>
+  </div>
+</section>
+
+<script>
+  import '../demo/main';
+</script>

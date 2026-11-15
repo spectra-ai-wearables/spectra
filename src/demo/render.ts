@@ -1,5 +1,5 @@
 import { SESSION_LENGTH } from '../sim/baseline';
-import type { EventStage, Phase, QualityReason, QueuedEvent } from '../sim/types';
+import type { EventStage, Phase, QualityReason, QueuedEvent, WindowResult } from '../sim/types';
 import { bandPath, linePath, xAt } from './chart';
 import type { DemoView } from './controller';
 
@@ -37,6 +37,32 @@ function one<T extends Element>(root: Element, selector: string): T {
 
 const clockText = (seconds: number) =>
   `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`;
+
+/** Score at which the meter is full; the threshold of 3 sits at a quarter. */
+const METER_MAX = 12;
+
+function paintDetector(element: HTMLElement, result: WindowResult | null) {
+  const score = result?.score ?? null;
+  const verdict =
+    result === null
+      ? { key: 'none', text: '' }
+      : result.state === 'insufficient-data'
+        ? { key: 'none', text: 'not scored: unreliable data' }
+        : result.state === 'change-to-verify'
+          ? { key: 'verify', text: 'asks for a check' }
+          : result.deviating
+            ? { key: 'watch', text: 'above threshold, watching' }
+            : { key: 'ok', text: 'within pattern' };
+
+  element.dataset.verdict = verdict.key;
+  one<HTMLElement>(element, '[data-score]').textContent =
+    score === null ? '—' : Math.abs(score).toFixed(1);
+  one<HTMLElement>(element, '[data-verdict-text]').textContent = verdict.text;
+  element.style.setProperty(
+    '--fill',
+    String(score === null ? 0 : Math.min(Math.abs(score) / METER_MAX, 1)),
+  );
+}
 
 function eventItem(item: QueuedEvent): HTMLLIElement {
   const li = document.createElement('li');
@@ -81,6 +107,8 @@ export function createRenderer(root: HTMLElement): (view: DemoView) => void {
     hr: one<HTMLElement>(root, '[data-hr]'),
     temp: one<HTMLElement>(root, '[data-temp]'),
     quality: one<HTMLElement>(root, '[data-quality]'),
+    model: one<HTMLElement>(root, '[data-detector="model"]'),
+    baseline: one<HTMLElement>(root, '[data-detector="baseline"]'),
     band: one<SVGPathElement>(root, '[data-band]'),
     line: one<SVGPathElement>(root, '[data-line]'),
     cursor: one<SVGLineElement>(root, '[data-cursor]'),
@@ -114,6 +142,9 @@ export function createRenderer(root: HTMLElement): (view: DemoView) => void {
     el.hr.textContent = view.latest?.hr == null ? '—' : String(Math.round(view.latest.hr));
     el.temp.textContent = view.latest?.skinTemp == null ? '—' : view.latest.skinTemp.toFixed(1);
     el.quality.textContent = view.result ? QUALITY_LABEL[view.result.quality.reason] : '—';
+
+    paintDetector(el.model, view.result);
+    paintDetector(el.baseline, view.baseline);
 
     el.line.setAttribute('d', linePath(view.samples));
     const cursorX = xAt(view.elapsed).toFixed(1);

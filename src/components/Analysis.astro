@@ -1,3 +1,18 @@
+---
+import evaluation from '../ml/evaluation.json';
+import model from '../ml/model.json';
+
+const { training } = model;
+const sessionsPerCase = evaluation[0].sessions;
+
+function outcome(alerts: number, sessions: number, medianDelay: number | null, alertExpected: boolean) {
+  if (!alertExpected) {
+    return alerts === 0 ? `No false alerts in ${sessions}` : `${alerts} false alerts in ${sessions}`;
+  }
+  const delay = medianDelay === null ? '' : `, median ${medianDelay} s into recovery`;
+  return `Caught ${alerts} of ${sessions}${delay}`;
+}
+---
 <section class="section" id="analysis">
   <p class="eyebrow">On-board AI</p>
   <h2 class="section-title">Machine learning that runs where the astronaut is.</h2>
@@ -12,15 +27,15 @@
       <h3>Can this reading be trusted?</h3>
       <p>
         Lost contact, missing data and motion are detected first. An unreliable window is
-        never analyzed; the astronaut is asked to adjust the sensor and measure again.
+        never scored; the astronaut is asked to adjust the sensor and measure again.
       </p>
     </li>
     <li>
       <h3>How does it compare with this person?</h3>
       <p>
-        Readings are compared with the astronaut's own reference for the current activity:
-        rest, exercise or recovery. The demo uses a demonstration reference; an operational
-        baseline requires longitudinal data.
+        A neural network predicts this astronaut's heart rate and skin temperature for the
+        current moment of the activity. It is told the schedule, never the expected values:
+        it learns those, and how much they normally vary, from reference sessions.
       </p>
     </li>
     <li>
@@ -32,25 +47,60 @@
       </p>
     </li>
   </ol>
+
   <div class="status">
     <div class="status-card">
-      <p class="status-label">Designed for the product</p>
-      <h3>A compact anomaly-detection model</h3>
+      <p class="status-label">Running in this demo</p>
+      <h3>A small neural network</h3>
       <p>
-        A small neural network, trained beforehand on each astronaut's reference sessions
-        and run on the on-board server for inference only. It takes pulse, motion, skin
-        temperature and the multispectral channels together, so it can learn patterns no
-        single threshold captures.
+        Two hidden layers and {training.parameters} parameters, trained beforehand
+        on {training.sessions} synthetic sessions of normal recovery and run in your browser
+        for inference only. Its inputs are heart rate and skin temperature.
       </p>
     </div>
     <div class="status-card">
-      <p class="status-label">Running in this demo</p>
-      <h3>A statistical baseline</h3>
+      <p class="status-label">Designed for the product</p>
+      <h3>The same model, on the spacecraft</h3>
       <p>
-        A robust deviation score with a persistence rule, computed in your browser on
-        synthetic data. No trained model runs on this page. The baseline is the benchmark
-        the model has to beat.
+        Trained on each astronaut's measured reference sessions and run on the on-board
+        server. Motion and the multispectral channels become inputs once measured data
+        shows they help; we have not tested that yet.
       </p>
     </div>
   </div>
+
+  <h3 class="subsection-title">Does the model add anything?</h3>
+  <p>
+    We ran the model and a plain statistical baseline on {sessionsPerCase} sessions per
+    case. None of these sessions was used to train or tune the model. Both use the same
+    rule: three consecutive windows above the threshold.
+  </p>
+  <table class="eval-table">
+    <thead>
+      <tr>
+        <th scope="col">Case</th>
+        <th scope="col">Statistical baseline</th>
+        <th scope="col">On-board model</th>
+      </tr>
+    </thead>
+    <tbody>
+      {evaluation.map((row) => (
+        <tr>
+          <th scope="row">{row.label}</th>
+          <td data-column="Statistical baseline">
+            {outcome(row.baseline.alerts, row.sessions, row.baseline.medianDelay, row.alertExpected)}
+          </td>
+          <td data-column="On-board model">
+            {outcome(row.model.alerts, row.sessions, row.model.medianDelay, row.alertExpected)}
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+  <p class="source">
+    Read this as a technical result. Every session is synthetic, and the simulator ties
+    skin temperature to effort, which the model benefits from. Zero false alerts
+    in {sessionsPerCase} sessions does not mean the rate is zero. None of this is clinical
+    performance; it shows the pipeline works and what to measure next.
+  </p>
 </section>

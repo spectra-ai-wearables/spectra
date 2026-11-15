@@ -17,8 +17,9 @@ const gridY = (hr: number) =>
   <h2 class="section-title">Run a session and watch both sides.</h2>
   <p>
     Pick a scenario. The astronaut panel shows what Spectra tells the crew member; the
-    ground panel shows what reaches mission control, and when. The analysis you see here is
-    the statistical baseline; the <a href="#analysis">on-board model</a> is the product design.
+    ground panel shows what reaches mission control, and when. The state shown comes from
+    the <a href="#analysis">on-board model</a>, a small neural network running in your browser;
+    the statistical baseline runs beside it for comparison.
   </p>
 
   <noscript>
@@ -60,6 +61,24 @@ const gridY = (hr: number) =>
           <p class="reading-label" data-label>Collecting the first window</p>
           <p class="reading-detail" data-detail>Press play to start the session.</p>
           <p class="reading-action"><strong>Next:</strong> <span data-action>—</span></p>
+        </div>
+
+        <div class="detectors">
+          <div class="detector" data-detector="model" data-verdict="none">
+            <p class="detector-name">On-board model <span class="tag">Neural network</span></p>
+            <p class="detector-value"><span data-score>—</span> <span data-verdict-text></span></p>
+            <div class="meter" aria-hidden="true"><span class="meter-fill"></span></div>
+          </div>
+          <div class="detector" data-detector="baseline" data-verdict="none">
+            <p class="detector-name">Statistical baseline <span class="tag">For comparison</span></p>
+            <p class="detector-value"><span data-score>—</span> <span data-verdict-text></span></p>
+            <div class="meter" aria-hidden="true"><span class="meter-fill"></span></div>
+          </div>
+          <p class="detectors-note">
+            Deviation score: how far the last window is from this astronaut's pattern, in
+            units of their usual variation. The mark is the threshold of 3; three windows in a
+            row above it ask for a check. It is not a probability of illness.
+          </p>
         </div>
 
         <figure class="chart">

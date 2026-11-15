@@ -3,9 +3,9 @@ import { CHART, PHASE_MARKS, xAt } from '../demo/chart';
 import { SPECTRAL_BANDS_NM } from '../sim/generator';
 
 const scenarios = [
-  { id: 'usual', label: 'Usual recovery' },
-  { id: 'misplaced', label: 'Sensor misplaced' },
-  { id: 'atypical', label: 'Atypical recovery, no link' },
+  { id: 'usual', label: 'Usual recovery', description: 'Follow a typical session' },
+  { id: 'misplaced', label: 'Sensor misplaced', description: 'See how signal checks respond' },
+  { id: 'atypical', label: 'Atypical recovery, no link', description: 'See events saved on board' },
 ];
 const gridHr = [60, 100, 140];
 const plotBottom = CHART.height - CHART.bottom;
@@ -13,14 +13,10 @@ const gridY = (hr: number) =>
   CHART.top + (1 - (hr - CHART.minHr) / (CHART.maxHr - CHART.minHr)) * (plotBottom - CHART.top);
 ---
 <section class="section demo-section" id="demo">
-  <p class="eyebrow">03 / Live demo</p>
-  <h2 class="section-title">Run a session and watch both sides.</h2>
-  <p>
-    Pick a scenario. The astronaut panel shows what Spectra tells the crew member; the
-    ground panel shows what reaches mission control, and when. The state shown comes from
-    the <a href="#model">on-board model</a>, a small neural network running in your browser;
-    the statistical baseline runs beside it for comparison.
-  </p>
+  <div class="console-heading">
+    <div><p class="eyebrow">Live telemetry</p><h2 class="section-title">Crew &amp; ground.</h2></div>
+    <p>One session, two perspectives.<br />Local inference keeps running when the link goes down.</p>
+  </div>
 
   <noscript>
     <p class="demo-fallback">
@@ -30,22 +26,26 @@ const gridY = (hr: number) =>
 
   <div class="demo" data-demo hidden>
     <div class="demo-bar">
+      <div class="scenario-group"><p class="control-label">01 / Choose a scenario</p>
       <div class="demo-scenarios" role="group" aria-label="Scenario">
         {scenarios.map((scenario) => (
           <button type="button" data-scenario={scenario.id} aria-pressed="false">
-            {scenario.label}
+            <strong>{scenario.label}</strong><small>{scenario.description}</small>
           </button>
         ))}
       </div>
+      </div>
+      <div class="controls-group"><p class="control-label">02 / Session controls</p>
       <div class="demo-controls">
-        <button type="button" data-play>Play</button>
-        <button type="button" data-reset>Reset</button>
+        <button type="button" data-play>Start session</button>
+        <button type="button" data-reset>Restart</button>
         <button type="button" role="switch" aria-checked="true" data-link>
           Link to Earth
         </button>
-        <button type="button" data-fullscreen>Full screen</button>
-        <button type="button" data-logs aria-pressed="false" aria-controls="demo-log">Logs</button>
-        <button type="button" data-insights>Generate insights</button>
+        <button type="button" data-fullscreen>Focus mode</button>
+        <button type="button" data-logs aria-pressed="false" aria-controls="demo-log">System log</button>
+        <button type="button" data-insights>Review session</button>
+      </div>
       </div>
       <p class="demo-badge">Synthetic data</p>
     </div>
@@ -54,7 +54,7 @@ const gridY = (hr: number) =>
       <div><dt>Mission clock</dt><dd>T+<span data-clock>00:00</span></dd></div>
       <div><dt>Phase</dt><dd data-phase>Rest</dd></div>
       <div><dt>Sensor</dt><dd data-sensor data-level="idle">Standby</dd></div>
-      <div><dt>Model score</dt><dd data-model-score data-level="idle">—</dd></div>
+      <div><dt>Model score</dt><dd data-model-score data-level="idle">Awaiting data</dd></div>
       <div><dt>Link</dt><dd data-link-cell data-level="ok">Up</dd></div>
       <div><dt>Queue</dt><dd data-queue data-level="idle">0 pending</dd></div>
     </dl>
@@ -66,20 +66,20 @@ const gridY = (hr: number) =>
         </header>
 
         <div class="reading" data-reading data-state="idle" aria-live="polite">
-          <p class="reading-label" data-label>Collecting the first window</p>
-          <p class="reading-detail" data-detail>Press play to start the session.</p>
-          <p class="reading-action"><strong>Next:</strong> <span data-action>—</span></p>
+          <p class="reading-label" data-label>Ready when you are</p>
+          <p class="reading-detail" data-detail>Choose a scenario, then select Start session.</p>
+          <p class="reading-action"><strong>Next:</strong> <span data-action>Awaiting data</span></p>
         </div>
 
         <div class="detectors">
           <div class="detector" data-detector="model" data-verdict="none">
             <p class="detector-name">On-board model <span class="tag">Neural network</span></p>
-            <p class="detector-value"><span data-score>—</span> <span data-verdict-text></span></p>
+            <p class="detector-value"><span data-score>Awaiting data</span> <span data-verdict-text></span></p>
             <div class="meter" aria-hidden="true"><span class="meter-fill"></span></div>
           </div>
           <div class="detector" data-detector="baseline" data-verdict="none">
             <p class="detector-name">Statistical baseline <span class="tag">For comparison</span></p>
-            <p class="detector-value"><span data-score>—</span> <span data-verdict-text></span></p>
+            <p class="detector-value"><span data-score>Awaiting data</span> <span data-verdict-text></span></p>
             <div class="meter" aria-hidden="true"><span class="meter-fill"></span></div>
           </div>
           <p class="detectors-note">
@@ -113,9 +113,9 @@ const gridY = (hr: number) =>
         </figure>
 
         <dl class="metrics">
-          <div><dt>Heart rate</dt><dd><span data-hr>—</span> <small>bpm</small></dd></div>
-          <div><dt>Skin temperature</dt><dd><span data-temp>—</span> <small>°C</small></dd></div>
-          <div><dt>Signal quality</dt><dd data-quality>—</dd></div>
+          <div><dt>Heart rate</dt><dd><span data-hr data-missing-value="true">No data</span> <small>bpm</small></dd></div>
+          <div><dt>Skin temperature</dt><dd><span data-temp data-missing-value="true">No data</span> <small>°C</small></dd></div>
+          <div><dt>Signal quality</dt><dd data-quality>Awaiting data</dd></div>
         </dl>
 
         <div class="spectral">
@@ -138,7 +138,7 @@ const gridY = (hr: number) =>
           <h3 id="panel-ground-title">Ground team</h3>
           <p class="link-status" data-link-status data-connected="true">Link up</p>
         </header>
-        <p class="events-empty" data-empty>No events received.</p>
+        <p class="events-empty" data-empty>No events to review. Updates appear here when a change persists.</p>
         <ol class="events" data-events aria-live="polite"></ol>
       </article>
 

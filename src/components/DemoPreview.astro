@@ -1,0 +1,23 @@
+---
+import { home } from '../site';
+---
+<section class="section demo-preview" id="demo">
+  <div class="preview-copy">
+    <p class="eyebrow">04 / Experience the system</p>
+    <h2 class="section-title">One session.<br />Both sides of the link.</h2>
+    <p>Follow a simulated recovery, disturb the sensor or interrupt the Earth link.
+      Watch local intelligence and mission control respond.</p>
+    <a class="button" href={`${home}demo/`}>Launch mission simulator <span aria-hidden="true">↗</span></a>
+    <p class="preview-note">Runs in your browser. Uses synthetic data.</p>
+  </div>
+  <a class="simulation-preview" href={`${home}demo/`} aria-label="Open the interactive mission simulator">
+    <div class="preview-bar"><span class="signal-dot" aria-hidden="true"></span> SESSION PREVIEW <span>T+02:40</span></div>
+    <div class="preview-reading"><span>Within your usual pattern</span><strong>72 <small>bpm</small></strong></div>
+    <svg viewBox="0 0 500 110" fill="none" aria-hidden="true">
+      <path d="M0 78H500M0 38H500" stroke="#283142" />
+      <path d="M0 83C15 83 23 83 29 81C35 78 35 31 45 27C57 23 60 64 70 65C76 65 76 55 83 59C94 65 91 83 112 83S133 84 139 81C145 78 145 31 155 27C167 23 170 64 180 65C186 65 186 55 193 59C204 65 201 83 222 83S243 84 249 81C255 78 255 31 265 27C277 23 280 64 290 65C296 65 296 55 303 59C314 65 311 83 332 83S353 84 359 81C365 78 365 31 375 27C387 23 390 64 400 65C406 65 406 55 413 59C424 65 421 83 442 83H500" stroke="#4fd1a5" stroke-width="2" />
+    </svg>
+    <div class="preview-route"><span>WRISTBAND</span><span aria-hidden="true">→</span><span>ONBOARD AI</span><span aria-hidden="true">→</span><span>EARTH</span></div>
+    <span class="preview-open">Explore the live simulation <span aria-hidden="true">↗</span></span>
+  </a>
+</section>

@@ -34,7 +34,7 @@ export function sessionInsights(
     return [
       {
         title: 'Not enough data',
-        value: '—',
+        value: 'Awaiting data',
         detail: 'Spectra needs one complete ten-second window before it can summarize the session.',
       },
     ];
@@ -74,7 +74,7 @@ export function sessionInsights(
   if (samples.length < EXERCISE_END + 65) {
     insights.push({
       title: 'One-minute recovery',
-      value: '—',
+      value: 'Not reached',
       detail: 'The session has not reached one minute of recovery yet.',
     });
   } else {
@@ -84,7 +84,7 @@ export function sessionInsights(
       atEnd === null || later === null
         ? {
             title: 'One-minute recovery',
-            value: '—',
+            value: 'Unavailable',
             detail: 'Readings around the first minute of recovery were not reliable enough to measure this.',
           }
         : {
@@ -117,7 +117,7 @@ export function sessionInsights(
   if (temps.length > 0) {
     insights.push({
       title: 'Skin temperature',
-      value: `${Math.min(...temps).toFixed(1)}–${Math.max(...temps).toFixed(1)} °C`,
+      value: `${Math.min(...temps).toFixed(1)} to ${Math.max(...temps).toFixed(1)} °C`,
       detail: 'Range across the session so far. This is skin temperature, not core body temperature.',
     });
   }

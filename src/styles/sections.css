@@ -569,7 +569,7 @@ figcaption {
 
 .status-col li::before,
 .limits li::before {
-  content: '—';
+  content: '·';
   position: absolute;
   left: 0;
   font-family: var(--font-mono);

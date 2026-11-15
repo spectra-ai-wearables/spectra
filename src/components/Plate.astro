@@ -20,7 +20,9 @@ const full = await getImage({ src: image, width: image.width, format: 'webp', qu
       src={image}
       alt={alt}
       widths={[640, 960, 1280, 1536]}
-      sizes="(min-width: 1536px) 1536px, 100vw"
+      sizes="(min-width: 1360px) 1360px, 100vw"
+      loading="lazy"
+      decoding="async"
       quality={82}
     />
     <span class="plate-zoom">Enlarge <span aria-hidden="true">+</span></span>

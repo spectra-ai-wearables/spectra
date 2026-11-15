@@ -11,7 +11,23 @@ function init(root: HTMLElement) {
   const render = createRenderer(root);
   const insights = createInsightsPanel(root);
   const logPanel = root.querySelector<HTMLElement>('[data-log-panel]');
-  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const focusButton = root.querySelector<HTMLButtonElement>('[data-fullscreen]')!;
+  const originalParent = root.parentElement!;
+  const nextSibling = root.nextSibling;
+  const focusDialog = document.createElement('dialog');
+  focusDialog.className = 'demo-focus';
+  focusDialog.id = 'mission-focus';
+  focusDialog.setAttribute('aria-label', 'Mission simulator focus mode');
+  focusButton.setAttribute('aria-controls', focusDialog.id);
+  focusButton.setAttribute('aria-pressed', 'false');
+  document.body.append(focusDialog);
+  focusDialog.addEventListener('close', () => {
+    originalParent.insertBefore(root, nextSibling);
+    document.body.classList.remove('demo-focused');
+    focusButton.textContent = 'Focus mode';
+    focusButton.setAttribute('aria-pressed', 'false');
+    focusButton.focus({ preventScroll: true });
+  });
   let timer: number | undefined;
 
   const paint = () => render(demo.view());
@@ -45,7 +61,7 @@ function init(root: HTMLElement) {
       stop();
       demo.select(button.dataset.scenario as ScenarioId);
       insights.hide();
-      if (!reducedMotion) start();
+      // Selecting a scenario prepares it; starting remains an explicit action.
     } else if ('play' in button.dataset) {
       if (demo.view().playing) stop();
       else start();
@@ -56,8 +72,15 @@ function init(root: HTMLElement) {
     } else if ('link' in button.dataset) {
       demo.setConnected(!demo.view().connected);
     } else if ('fullscreen' in button.dataset) {
-      if (document.fullscreenElement) void document.exitFullscreen();
-      else void root.requestFullscreen();
+      if (focusDialog.open) focusDialog.close();
+      else {
+        focusDialog.append(root);
+        focusDialog.showModal();
+        document.body.classList.add('demo-focused');
+        focusButton.textContent = 'Exit focus mode';
+        focusButton.setAttribute('aria-pressed', 'true');
+        focusButton.focus();
+      }
     } else if ('logs' in button.dataset && logPanel) {
       const open = logPanel.hidden;
       logPanel.hidden = !open;

@@ -57,7 +57,7 @@ describe('sessionInsights', () => {
 
   test('does not measure recovery from unreliable readings', () => {
     const recovery = insightsFor('misplaced').get('One-minute recovery')!;
-    expect(recovery.value).toBe('—');
+    expect(recovery.value).toBe('Unavailable');
     expect(recovery.detail).toContain('not reliable enough');
   });
 

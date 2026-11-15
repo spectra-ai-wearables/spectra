@@ -1,0 +1,18 @@
+---
+import Logo from './Logo.astro';
+import { home } from '../site';
+interface Props { demo?: boolean }
+const { demo = false } = Astro.props;
+---
+<header class="site-header">
+  <a href={home} aria-label="Spectra home"><Logo /></a>
+  <nav aria-label="Main navigation">
+    <a href={`${home}#wristband`}>Wristband</a>
+    <a href={`${home}#server`}>Onboard server</a>
+    <a href={`${home}#design`}>Engineering</a>
+    <a href={`${home}#model`}>Intelligence</a>
+  </nav>
+  <a class="nav-demo" href={`${home}demo/`} aria-current={demo ? 'page' : undefined}>
+    {demo ? 'Mission simulator' : 'Launch demo'} <span aria-hidden="true">↗</span>
+  </a>
+</header>

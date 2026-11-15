@@ -16,21 +16,28 @@
     const image = dialog.querySelector<HTMLImageElement>('[data-lightbox-image]')!;
     const title = dialog.querySelector<HTMLElement>('[data-lightbox-title]')!;
     const stage = dialog.querySelector<HTMLElement>('[data-lightbox-stage]')!;
+    let opener: HTMLAnchorElement | null = null;
 
     document.addEventListener('click', (event) => {
       const link = (event.target as Element).closest<HTMLAnchorElement>('a[data-enlarge]');
       if (!link) return;
       event.preventDefault();
+      opener = link;
       image.src = link.href;
       image.alt = link.querySelector('img')?.alt ?? '';
       title.textContent = link.dataset.title ?? '';
       dialog.showModal();
+      document.body.classList.add('image-expanded');
       stage.scrollTo(0, 0);
     });
 
     dialog.addEventListener('click', (event) => {
       const target = event.target as Element;
       if (target === dialog || target.closest('[data-lightbox-close]')) dialog.close();
+    });
+    dialog.addEventListener('close', () => {
+      document.body.classList.remove('image-expanded');
+      opener?.focus({ preventScroll: true });
     });
   }
 </script>

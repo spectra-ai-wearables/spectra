@@ -1,7 +1,6 @@
 ---
-import architecture from '../assets/wristband-architecture.png';
-import design from '../assets/wristband-design.png';
-import Plate from './Plate.astro';
+import architecture from '../assets/wristband-exploded-clean.png';
+import ComponentStudy from './ComponentStudy.astro';
 
 const parts = [
   {
@@ -20,12 +19,12 @@ const parts = [
   { name: 'Battery and power management', role: 'Powers sensing on the wrist.', tag: null },
 ];
 ---
-<section class="section" id="wristband">
+<section class="section product-section" id="wristband">
   <p class="eyebrow">01 / Wristband</p>
   <h2 class="section-title">Screenless sensing. Continuous contact.</h2>
   <p class="section-lede">
-    The wristband has one job: keep its sensors against the skin and send what they read to
-    the onboard server.
+    A continuous band. A discreet sensor array. The proposed wristband gathers signals
+    without adding another screen to the astronaut’s day.
   </p>
   <p>
     There is no screen and nothing to operate. A titanium outer shell and a soft inner liner
@@ -33,38 +32,13 @@ const parts = [
     not interpret. Analysis happens on the server, a short wireless hop away.
   </p>
 
-  <Plate
-    image={architecture}
-    variant="render"
-    title="Wristband: sensor architecture"
-    alt="Exploded view of the wristband in three layers: the outer shell, the electronics carrier and the inner liner with its sensor module. Six numbered components are described in the list that follows."
-  >
-    Exploded view. Proposed component layout.
-  </Plate>
-
-  <ol class="parts">
-    {parts.map((part, i) => (
-      <li>
-        <p class="part-index">{String(i + 1).padStart(2, '0')}</p>
-        <h3>{part.name}{part.tag && <span class="tag">{part.tag}</span>}</h3>
-        <p>{part.role}</p>
-      </li>
-    ))}
-  </ol>
+  <ComponentStudy image={architecture} parts={parts} title="Wristband sensor assembly"
+    alt="Exploded view of the Spectra wristband: titanium shell, flexible electronics and skin-contact sensor liner." />
 
   <p>
     A multispectral sensor measures the spectral content of light. That alone does not make
     it a validated measure of glucose, hydration or disease, and Spectra does not claim it is.
   </p>
 
-  <Plate
-    image={design}
-    variant="blueprint"
-    title="Wristband: design study"
-    alt="Design study of the wristband with top, side, inner-face and isometric views, and a section through the sensor module."
-  >
-    Design study: top, side, inner-face and isometric views, with section A-A through the
-    sensor module. Called out: titanium outer shell, soft inner liner, optical sensor window,
-    skin-temperature contact, embedded electronics and concealed clasp.
-  </Plate>
+
 </section>

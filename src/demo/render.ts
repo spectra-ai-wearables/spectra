@@ -26,7 +26,7 @@ const STAGE_LABEL: Record<EventStage, string> = {
 };
 
 const IDLE = {
-  label: 'Collecting the first window',
+  label: 'Reading your signals',
   detail: 'Spectra needs ten seconds of readings before it compares them with your pattern.',
   action: 'Keep the band on.',
 };
@@ -67,7 +67,7 @@ function paintDetector(element: HTMLElement, result: WindowResult | null) {
 
   element.dataset.verdict = verdict.key;
   one<HTMLElement>(element, '[data-score]').textContent =
-    score === null ? '—' : Math.abs(score).toFixed(1);
+    score === null ? (result === null ? 'Awaiting data' : 'Not scored') : Math.abs(score).toFixed(1);
   one<HTMLElement>(element, '[data-verdict-text]').textContent = verdict.text;
   element.style.setProperty(
     '--fill',
@@ -145,16 +145,16 @@ export function createRenderer(root: HTMLElement): (view: DemoView) => void {
     for (const button of scenarioButtons) {
       button.setAttribute('aria-pressed', String(button.dataset.scenario === view.scenario));
     }
-    el.play.textContent = view.playing ? 'Pause' : view.settled ? 'Replay' : 'Play';
+    el.play.textContent = view.playing ? 'Pause session' : view.settled ? 'Replay session' : view.elapsed > 0 ? 'Resume session' : 'Start session';
     el.link.setAttribute('aria-checked', String(view.connected));
 
     // Reading state
     const explanation = view.explanation ?? IDLE;
     el.reading.dataset.state = view.explanation?.state ?? 'idle';
-    el.label.textContent = explanation.label;
+    el.label.textContent = view.elapsed === 0 ? 'Ready when you are' : explanation.label;
     el.detail.textContent =
-      view.elapsed === 0 ? 'Press play to start the session.' : explanation.detail;
-    el.action.textContent = view.elapsed === 0 ? '—' : explanation.action;
+      view.elapsed === 0 ? 'Choose a scenario, then start a five-minute simulated session.' : explanation.detail;
+    el.action.textContent = view.elapsed === 0 ? 'Select Start session to begin.' : explanation.action;
 
     // Telemetry strip
     const latest = view.latest;
@@ -166,18 +166,20 @@ export function createRenderer(root: HTMLElement): (view: DemoView) => void {
     else setCell(el.sensor, 'Contact ok', 'ok');
 
     const score = view.result?.score ?? null;
-    if (view.result === null) setCell(el.modelScore, '—', 'idle');
+    if (view.result === null) setCell(el.modelScore, 'Awaiting data', 'idle');
     else if (score === null) setCell(el.modelScore, 'Not scored', 'warn');
     else setCell(el.modelScore, Math.abs(score).toFixed(1), view.result.deviating ? 'warn' : 'ok');
 
-    setCell(el.linkCell, view.connected ? 'Up' : 'Down', view.connected ? 'ok' : 'warn');
+    setCell(el.linkCell, view.connected ? 'Connected' : 'Offline', view.connected ? 'ok' : 'warn');
     const pending = view.events.filter((item) => item.stage !== 'received').length;
     setCell(el.queue, `${pending} pending`, pending > 0 ? 'warn' : 'idle');
 
     // Readings
-    el.hr.textContent = latest?.hr == null ? '—' : String(Math.round(latest.hr));
-    el.temp.textContent = latest?.skinTemp == null ? '—' : latest.skinTemp.toFixed(1);
-    el.quality.textContent = view.result ? QUALITY_LABEL[view.result.quality.reason] : '—';
+    el.hr.dataset.missingValue = String(latest?.hr == null);
+    el.temp.dataset.missingValue = String(latest?.skinTemp == null);
+    el.hr.textContent = latest?.hr == null ? 'No data' : String(Math.round(latest.hr));
+    el.temp.textContent = latest?.skinTemp == null ? 'No data' : latest.skinTemp.toFixed(1);
+    el.quality.textContent = view.result ? QUALITY_LABEL[view.result.quality.reason] : 'Awaiting data';
     paintDetector(el.model, view.result);
     paintDetector(el.baseline, view.baseline);
 
@@ -201,7 +203,8 @@ export function createRenderer(root: HTMLElement): (view: DemoView) => void {
 
     // Ground panel
     el.linkStatus.dataset.connected = String(view.connected);
-    el.linkStatus.textContent = view.connected ? 'Link up' : 'No link';
+    el.linkStatus.textContent = view.connected ? 'Earth link connected' : 'Earth link offline';
+    el.empty.textContent = view.connected ? 'No events to review. Updates will appear here when a change persists.' : 'Earth link offline. Any new events stay on board until the connection returns.';
     const signature = view.events.map((item) => `${item.event.id}:${item.stage}`).join('|');
     if (signature !== lastEvents) {
       lastEvents = signature;

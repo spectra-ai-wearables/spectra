@@ -1,0 +1,60 @@
+---
+import wristband from '../assets/wristband-design.png';
+import server from '../assets/server-design.png';
+import Plate from './Plate.astro';
+---
+<section class="section engineering" id="design" data-engineering>
+  <p class="eyebrow">03 / Beneath the surface</p>
+  <h2 class="section-title">Precision, inside out.</h2>
+  <p class="section-lede">Explore the proposed construction. Switch between products, then open a drawing to inspect the details.</p>
+  <div class="study-tabs" role="tablist" aria-label="Hardware design studies" hidden>
+    <button type="button" role="tab" id="tab-wristband" aria-selected="true" aria-controls="study-wristband" tabindex="0">01 <span>Wristband</span></button>
+    <button type="button" role="tab" id="tab-server" aria-selected="false" aria-controls="study-server" tabindex="-1">02 <span>Onboard server</span></button>
+  </div>
+  <div class="study-panel bleed" id="study-wristband">
+    <Plate image={wristband} variant="blueprint" title="Wristband: design study"
+      alt="Wristband orthographic views and sensor-module section identifying the titanium shell, liner, optical window, temperature contact, electronics and clasp.">
+      Wristband construction / Outer shell, sensor module and skin-contact surfaces.
+    </Plate>
+  </div>
+  <div class="study-panel bleed" id="study-server">
+    <Plate image={server} variant="blueprint" title="Onboard server: design study"
+      alt="Onboard server top, front, rear and section views identifying the Raspberry Pi, thermal spreader, storage, RF window, power and network connections.">
+      Server construction / Computing, thermal management and local connectivity.
+    </Plate>
+  </div>
+</section>
+<script>
+  const engineering = document.querySelector<HTMLElement>('[data-engineering]');
+  if (engineering) {
+    const tablist = engineering.querySelector<HTMLElement>('[role="tablist"]')!;
+    const tabs = [...tablist.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
+    const panels = [...engineering.querySelectorAll<HTMLElement>('.study-panel')];
+    function select(index: number, focus = false) {
+      tabs.forEach((tab, i) => {
+        tab.setAttribute('aria-selected', String(i === index));
+        tab.tabIndex = i === index ? 0 : -1;
+        panels[i].hidden = i !== index;
+      });
+      if (focus) tabs[index].focus();
+    }
+    panels.forEach((panel, index) => {
+      panel.setAttribute('role', 'tabpanel');
+      panel.setAttribute('aria-labelledby', tabs[index].id);
+      panel.tabIndex = 0;
+    });
+    tabs.forEach((tab, index) => {
+      tab.addEventListener('click', () => select(index));
+      tab.addEventListener('keydown', (event) => {
+        const keys = ['ArrowRight', 'ArrowLeft', 'Home', 'End'];
+        if (!keys.includes(event.key)) return;
+        event.preventDefault();
+        const next = event.key === 'Home' ? 0 : event.key === 'End' ? tabs.length - 1
+          : (index + (event.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length;
+        select(next, true);
+      });
+    });
+    select(0);
+    tablist.hidden = false;
+  }
+</script>

@@ -1,6 +1,8 @@
 ---
 import Analysis from '../components/Analysis.astro';
-import Demo from '../components/Demo.astro';
+import DemoPreview from '../components/DemoPreview.astro';
+import Design from '../components/Design.astro';
+import Header from '../components/Header.astro';
 import Hero from '../components/Hero.astro';
 import Lightbox from '../components/Lightbox.astro';
 import Problem from '../components/Problem.astro';
@@ -11,12 +13,14 @@ import Wristband from '../components/Wristband.astro';
 import Base from '../layouts/Base.astro';
 ---
 <Base>
-  <Hero />
+  <Header />
   <main id="main">
+    <Hero />
     <Problem />
     <Wristband />
     <Server />
-    <Demo />
+    <Design />
+    <DemoPreview />
     <Analysis />
     <Status />
     <Team />

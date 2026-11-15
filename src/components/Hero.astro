@@ -1,46 +1,28 @@
 ---
 import { Image } from 'astro:assets';
-import gadget from '../assets/gadget.jpeg';
+import products from '../assets/products.png';
 import { home } from '../site';
-import Logo from './Logo.astro';
 ---
-<header class="site-header">
-  <a href={home} aria-label="Spectra home"><Logo /></a>
-  <nav aria-label="Sections">
-    <a href="#wristband">Wristband</a>
-    <a href="#server">Onboard server</a>
-    <a href="#demo">Demo</a>
-    <a href="#model">Model</a>
-    <a href="#status">Status</a>
-    <a href="#team">Team</a>
-  </nav>
-</header>
-
-<section class="hero">
+<section class="hero" aria-labelledby="hero-title">
   <div class="hero-copy">
-    <p class="eyebrow">On-board health monitoring for astronauts</p>
-    <h1>Turn body signals into information astronauts can use on board.</h1>
-    <p class="lede">
-      Spectra pairs a screenless multispectral wristband with a compact onboard server.
-      Readings are checked and analyzed on the spacecraft, and events wait in a queue until
-      spacecraft communications can carry them to Earth.
-    </p>
+    <p class="eyebrow"><span class="signal-dot" aria-hidden="true"></span> Designed for life beyond Earth</p>
+    <h1 id="hero-title">Human signals.<br /><span>Onboard intelligence.</span></h1>
+    <p class="lede">A quiet presence on the wrist. An intelligent companion on board.
+      Personal health monitoring that stays with the crew, even when Earth is out of reach.</p>
     <div class="hero-actions">
-      <a class="button" href="#demo">Run the demo</a>
-      <a class="text-link" href="#wristband">See the hardware</a>
+      <a class="button" href="#wristband">Explore the system <span aria-hidden="true">↓</span></a>
+      <a class="text-link" href={`${home}demo/`}>Enter the live demo <span aria-hidden="true">↗</span></a>
     </div>
-    <p class="hero-note">Proposed hardware and model. The demo runs on synthetic data.</p>
+    <p class="hero-note">Hardware concept · Working simulation · Synthetic data</p>
   </div>
   <figure class="hero-stage">
-    <Image
-      src={gadget}
-      alt="The Spectra wristband, a screenless titanium-colored band with optical sensors on its inner face, standing beside the compact onboard server."
-      widths={[640, 960, 1280, 1536]}
-      sizes="(min-width: 1536px) 1536px, 120vw"
-      loading="eager"
-      fetchpriority="high"
-      quality={82}
-    />
-    <figcaption>Concept render: the wristband and the onboard server.</figcaption>
+    <Image src={products}
+      alt="A seamless graphite Spectra wristband with inner optical sensors beside the compact, rounded onboard server."
+      widths={[640, 960, 1280, 1536]} sizes="(min-width: 1000px) 62vw, 100vw"
+      loading="eager" fetchpriority="high" quality={88} />
   </figure>
+  <div class="hero-foot">
+    <span>01 / SENSE</span><span>02 / UNDERSTAND</span><span>03 / CONNECT</span>
+    <a href="#problem">Discover Spectra <span aria-hidden="true">↓</span></a>
+  </div>
 </section>

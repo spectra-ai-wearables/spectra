@@ -1,0 +1,35 @@
+---
+import type { ImageMetadata } from 'astro';
+import { Image, getImage } from 'astro:assets';
+interface Props {
+  image: ImageMetadata;
+  title: string;
+  alt: string;
+  parts: { name: string; role: string; tag?: string | null }[];
+}
+const { image, title, alt, parts } = Astro.props;
+const full = await getImage({src: image, width: image.width, format: 'webp', quality: 90});
+---
+<div class="component-study">
+  <figure class="component-stage">
+    <a href={full.src} data-enlarge data-title={title} aria-label={`Enlarge ${title.toLowerCase()}`}>
+      <Image src={image} alt={alt} widths={[480, 720, 960, 1536]}
+        sizes="(min-width: 1000px) 720px, 100vw" loading="lazy" quality={88} />
+      <span class="study-zoom">View full size <span aria-hidden="true">↗</span></span>
+    </a>
+    <figcaption>Exploded view of the proposed hardware.</figcaption>
+  </figure>
+  <div class="component-rows">
+    <p class="eyebrow">Explore the components</p>
+    {parts.map((part, index) => (
+      <details name={title} open={index === 0}>
+        <summary><span class="component-number">{String(index + 1).padStart(2, '0')}</span>
+          <span>{part.name}</span><span class="component-plus" aria-hidden="true">+</span></summary>
+        <div class="component-description">
+          {part.tag && <span class="tag">{part.tag}</span>}
+          <p>{part.role}</p>
+        </div>
+      </details>
+    ))}
+  </div>
+</div>

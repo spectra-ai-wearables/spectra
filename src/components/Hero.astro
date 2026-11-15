@@ -1,8 +1,9 @@
 ---
+import { home } from '../site';
 import Logo from './Logo.astro';
 ---
 <header class="site-header">
-  <a href="/" aria-label="Spectra home"><Logo /></a>
+  <a href={home}aria-label="Spectra home"><Logo /></a>
   <nav aria-label="Sections">
     <a href="#how">How it works</a>
     <a href="#demo">Demo</a>

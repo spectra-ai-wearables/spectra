@@ -1,3 +1,6 @@
+/** Site root with a trailing slash, so links work under the GitHub Pages base path. */
+export const home = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/`;
+
 export const site = {
   name: 'Spectra',
   title: 'Spectra — on-board health monitoring for astronauts',

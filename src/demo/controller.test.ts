@@ -106,6 +106,62 @@ describe('createDemo', () => {
     expect(view.elapsed).toBe(SESSION_LENGTH);
   });
 
+  test('keeps every window read so far', () => {
+    const demo = createDemo('usual');
+    run(demo, 35);
+    expect(demo.view().results.map((r) => r.tStart)).toEqual([0, 10, 20]);
+  });
+
+  test('logs the session from start to finish', () => {
+    const demo = createDemo('usual');
+    expect(demo.view().log).toEqual([]);
+    run(demo, SESSION_LENGTH);
+    const messages = demo.view().log.map((entry) => entry.message);
+    expect(messages[0]).toBe('session started: usual recovery');
+    expect(messages).toContain('phase: exercise');
+    expect(messages).toContain('phase: recovery');
+    expect(messages.at(-1)).toBe('session complete');
+    expect(messages.filter((m) => m.startsWith('window '))).toHaveLength(30);
+    expect(demo.view().log.some((entry) => entry.level === 'alert')).toBe(false);
+  });
+
+  test('logs lost contact and windows that were not scored', () => {
+    const demo = createDemo('misplaced');
+    run(demo, SESSION_LENGTH);
+    const log = demo.view().log;
+    expect(log.find((e) => e.message === 'skin contact lost')).toMatchObject({ t: 171, source: 'sensor', level: 'warn' });
+    expect(log.some((e) => e.message === 'skin contact restored')).toBe(true);
+    expect(log.some((e) => e.message === 'window 02:50-03:00 not scored: no skin contact')).toBe(true);
+    expect(log.some((e) => e.message.endsWith('not scored: movement interference'))).toBe(true);
+  });
+
+  test('logs the alert and the event on its way to the ground', () => {
+    const demo = createDemo('atypical');
+    run(demo, SESSION_LENGTH);
+    demo.setConnected(true);
+    run(demo, DEFAULT_DELAY);
+    const log = demo.view().log;
+    const messages = log.map((entry) => entry.message);
+    expect(messages).toContain('link to Earth down');
+    expect(log.filter((entry) => entry.level === 'alert')).toHaveLength(1);
+    const order = [
+      'evt-170 saved on board',
+      'evt-170 waiting: no link',
+      'link to Earth up',
+      'evt-170 sending to ground',
+      'evt-170 received on ground',
+    ].map((message) => messages.indexOf(message));
+    expect(order.every((index) => index >= 0)).toBe(true);
+    expect([...order].sort((a, b) => a - b)).toEqual(order);
+  });
+
+  test('reset clears the log', () => {
+    const demo = createDemo('usual');
+    run(demo, 50);
+    demo.reset();
+    expect(demo.view().log).toEqual([]);
+  });
+
   test('play and pause only change the playing flag', () => {
     const demo = createDemo('usual');
     demo.play();

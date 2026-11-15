@@ -1,0 +1,44 @@
+---
+// Eight multispectral emitters in a ring around the pulse sensor.
+const ring = [
+  'var(--band-1)',
+  'var(--band-2)',
+  'color-mix(in srgb, var(--band-2), var(--band-3))',
+  'var(--band-3)',
+  'color-mix(in srgb, var(--band-3), var(--band-4))',
+  'var(--band-4)',
+  'color-mix(in srgb, var(--band-4), var(--band-5))',
+  'var(--band-5)',
+].map((fill, i) => {
+  const angle = (i / 8) * 2 * Math.PI - Math.PI / 2;
+  return { fill, cx: (120 + 31 * Math.cos(angle)).toFixed(1), cy: (160 + 31 * Math.sin(angle)).toFixed(1) };
+});
+
+const callouts = [
+  { n: 1, from: '132,99', y: 82 },
+  { n: 2, from: '146,142', y: 124 },
+  { n: 3, from: '136,162', y: 166 },
+  { n: 4, from: '136,220', y: 212 },
+];
+---
+<svg class="device" viewBox="0 0 240 320" role="img" aria-label="Back of the Spectra watch, the side against the skin, with four numbered sensors.">
+  <path class="device-band" d="M84 88 V14 a12 12 0 0 1 12 -12 h48 a12 12 0 0 1 12 12 V88" />
+  <path class="device-band" d="M84 232 V306 a12 12 0 0 0 12 12 h48 a12 12 0 0 0 12 -12 V232" />
+  <rect class="device-case" x="48" y="80" width="144" height="160" rx="40" />
+
+  <rect class="device-dashed" x="108" y="92" width="24" height="14" rx="2" />
+  <circle class="device-glass" cx="120" cy="160" r="46" />
+  {ring.map((dot) => <circle cx={dot.cx} cy={dot.cy} r="5" style={`fill: ${dot.fill}`} />)}
+  <circle cx="106" cy="160" r="4" style="fill: var(--state-ok)" />
+  <circle cx="134" cy="160" r="4" style="fill: var(--state-ok)" />
+  <rect class="device-detail" x="114" y="154" width="12" height="12" rx="2" />
+  <rect class="device-detail" x="104" y="216" width="32" height="8" rx="4" />
+
+  {callouts.map((callout) => (
+    <g class="device-marker">
+      <polyline class="device-leader" points={`${callout.from} 213,${callout.y}`} />
+      <circle cx="222" cy={callout.y} r="9" />
+      <text x="222" y={callout.y}>{callout.n}</text>
+    </g>
+  ))}
+</svg>

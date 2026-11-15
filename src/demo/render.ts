@@ -1,7 +1,9 @@
-import { SESSION_LENGTH } from '../sim/baseline';
+import { formatClock } from '../sim/format';
+import type { Insight } from '../sim/insights';
+import { MAX_MOTION } from '../sim/quality';
 import type { EventStage, Phase, QualityReason, QueuedEvent, WindowResult } from '../sim/types';
-import { bandPath, linePath, xAt } from './chart';
-import type { DemoView } from './controller';
+import { bandPath, linePath, xAt, yAt } from './chart';
+import type { DemoView, LogEntry } from './controller';
 
 const PHASE_LABEL: Record<Phase, string> = {
   rest: 'Rest',
@@ -29,17 +31,26 @@ const IDLE = {
   action: 'Keep the band on.',
 };
 
+/** Score at which the meter is full; the threshold of 3 sits at a quarter. */
+const METER_MAX = 12;
+
 function one<T extends Element>(root: Element, selector: string): T {
   const element = root.querySelector<T>(selector);
   if (!element) throw new Error(`Demo markup is missing ${selector}`);
   return element;
 }
 
-const clockText = (seconds: number) =>
-  `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`;
+function text(className: string, content: string, tag = 'p'): HTMLElement {
+  const element = document.createElement(tag);
+  element.className = className;
+  element.textContent = content;
+  return element;
+}
 
-/** Score at which the meter is full; the threshold of 3 sits at a quarter. */
-const METER_MAX = 12;
+function setCell(element: HTMLElement, content: string, level: 'idle' | 'ok' | 'warn') {
+  element.textContent = content;
+  element.dataset.level = level;
+}
 
 function paintDetector(element: HTMLElement, result: WindowResult | null) {
   const score = result?.score ?? null;
@@ -68,27 +79,28 @@ function eventItem(item: QueuedEvent): HTMLLIElement {
   const li = document.createElement('li');
   li.className = 'event';
   li.dataset.stage = item.stage;
+  li.append(
+    text('event-stage', STAGE_LABEL[item.stage]),
+    text('event-title', item.event.title),
+    text('event-detail', item.event.detail),
+    text(
+      'event-time',
+      item.receivedAt === null
+        ? `Recorded on board at ${formatClock(item.event.createdAt)}`
+        : `Recorded on board at ${formatClock(item.event.createdAt)} · received at ${formatClock(item.receivedAt)}`,
+    ),
+  );
+  return li;
+}
 
-  const stage = document.createElement('p');
-  stage.className = 'event-stage';
-  stage.textContent = STAGE_LABEL[item.stage];
-
-  const title = document.createElement('p');
-  title.className = 'event-title';
-  title.textContent = item.event.title;
-
-  const detail = document.createElement('p');
-  detail.className = 'event-detail';
-  detail.textContent = item.event.detail;
-
-  const time = document.createElement('p');
-  time.className = 'event-time';
-  time.textContent =
-    item.receivedAt === null
-      ? `Recorded on board at ${clockText(item.event.createdAt)}`
-      : `Recorded on board at ${clockText(item.event.createdAt)} · received at ${clockText(item.receivedAt)}`;
-
-  li.append(stage, title, detail, time);
+function logItem(entry: LogEntry): HTMLLIElement {
+  const li = document.createElement('li');
+  li.dataset.level = entry.level;
+  li.append(
+    text('log-time', formatClock(entry.t), 'time'),
+    text('log-source', entry.source, 'span'),
+    text('log-message', entry.message, 'span'),
+  );
   return li;
 }
 
@@ -104,6 +116,10 @@ export function createRenderer(root: HTMLElement): (view: DemoView) => void {
     action: one<HTMLElement>(root, '[data-action]'),
     clock: one<HTMLElement>(root, '[data-clock]'),
     phase: one<HTMLElement>(root, '[data-phase]'),
+    sensor: one<HTMLElement>(root, '[data-sensor]'),
+    modelScore: one<HTMLElement>(root, '[data-model-score]'),
+    linkCell: one<HTMLElement>(root, '[data-link-cell]'),
+    queue: one<HTMLElement>(root, '[data-queue]'),
     hr: one<HTMLElement>(root, '[data-hr]'),
     temp: one<HTMLElement>(root, '[data-temp]'),
     quality: one<HTMLElement>(root, '[data-quality]'),
@@ -111,14 +127,18 @@ export function createRenderer(root: HTMLElement): (view: DemoView) => void {
     baseline: one<HTMLElement>(root, '[data-detector="baseline"]'),
     band: one<SVGPathElement>(root, '[data-band]'),
     line: one<SVGPathElement>(root, '[data-line]'),
+    head: one<SVGCircleElement>(root, '[data-head]'),
     cursor: one<SVGLineElement>(root, '[data-cursor]'),
     linkStatus: one<HTMLElement>(root, '[data-link-status]'),
     events: one<HTMLElement>(root, '[data-events]'),
     empty: one<HTMLElement>(root, '[data-empty]'),
+    log: one<HTMLElement>(root, '[data-log]'),
+    logCount: one<HTMLElement>(root, '[data-log-count]'),
   };
 
   el.band.setAttribute('d', bandPath());
   let lastEvents = '';
+  let loggedEntries = 0;
 
   return (view) => {
     root.dataset.playing = String(view.playing);
@@ -128,43 +148,112 @@ export function createRenderer(root: HTMLElement): (view: DemoView) => void {
     el.play.textContent = view.playing ? 'Pause' : view.settled ? 'Replay' : 'Play';
     el.link.setAttribute('aria-checked', String(view.connected));
 
-    const text = view.explanation ?? IDLE;
+    // Reading state
+    const explanation = view.explanation ?? IDLE;
     el.reading.dataset.state = view.explanation?.state ?? 'idle';
-    el.label.textContent = text.label;
+    el.label.textContent = explanation.label;
     el.detail.textContent =
-      view.elapsed === 0 ? 'Press play to start the session.' : text.detail;
-    el.action.textContent = view.elapsed === 0 ? '—' : text.action;
+      view.elapsed === 0 ? 'Press play to start the session.' : explanation.detail;
+    el.action.textContent = view.elapsed === 0 ? '—' : explanation.action;
 
-    el.clock.textContent = view.finished
-      ? `${clockText(SESSION_LENGTH)} · session complete`
-      : clockText(view.elapsed);
-    el.phase.textContent = PHASE_LABEL[view.latest?.phase ?? 'rest'];
-    el.hr.textContent = view.latest?.hr == null ? '—' : String(Math.round(view.latest.hr));
-    el.temp.textContent = view.latest?.skinTemp == null ? '—' : view.latest.skinTemp.toFixed(1);
+    // Telemetry strip
+    const latest = view.latest;
+    el.clock.textContent = formatClock(view.elapsed);
+    el.phase.textContent = view.finished ? 'Complete' : PHASE_LABEL[latest?.phase ?? 'rest'];
+    if (latest === null) setCell(el.sensor, 'Standby', 'idle');
+    else if (!latest.contact) setCell(el.sensor, 'No contact', 'warn');
+    else if (latest.motion > MAX_MOTION) setCell(el.sensor, 'Movement', 'warn');
+    else setCell(el.sensor, 'Contact ok', 'ok');
+
+    const score = view.result?.score ?? null;
+    if (view.result === null) setCell(el.modelScore, '—', 'idle');
+    else if (score === null) setCell(el.modelScore, 'Not scored', 'warn');
+    else setCell(el.modelScore, Math.abs(score).toFixed(1), view.result.deviating ? 'warn' : 'ok');
+
+    setCell(el.linkCell, view.connected ? 'Up' : 'Down', view.connected ? 'ok' : 'warn');
+    const pending = view.events.filter((item) => item.stage !== 'received').length;
+    setCell(el.queue, `${pending} pending`, pending > 0 ? 'warn' : 'idle');
+
+    // Readings
+    el.hr.textContent = latest?.hr == null ? '—' : String(Math.round(latest.hr));
+    el.temp.textContent = latest?.skinTemp == null ? '—' : latest.skinTemp.toFixed(1);
     el.quality.textContent = view.result ? QUALITY_LABEL[view.result.quality.reason] : '—';
-
     paintDetector(el.model, view.result);
     paintDetector(el.baseline, view.baseline);
 
+    // Chart
     el.line.setAttribute('d', linePath(view.samples));
     const cursorX = xAt(view.elapsed).toFixed(1);
     el.cursor.setAttribute('x1', cursorX);
     el.cursor.setAttribute('x2', cursorX);
+    const showHead = latest !== null && latest.hr !== null;
+    el.head.toggleAttribute('hidden', !showHead);
+    if (latest !== null && latest.hr !== null) {
+      el.head.setAttribute('cx', xAt(latest.t).toFixed(1));
+      el.head.setAttribute('cy', yAt(latest.hr).toFixed(1));
+    }
 
-    const spectral = view.latest?.spectral ?? null;
+    const spectral = latest?.spectral ?? null;
     bars.forEach((bar, i) => {
       bar.style.setProperty('--level', String(spectral ? spectral[i] : 0));
       bar.dataset.missing = String(spectral === null && view.elapsed > 0);
     });
 
+    // Ground panel
     el.linkStatus.dataset.connected = String(view.connected);
     el.linkStatus.textContent = view.connected ? 'Link up' : 'No link';
-
     const signature = view.events.map((item) => `${item.event.id}:${item.stage}`).join('|');
     if (signature !== lastEvents) {
       lastEvents = signature;
       el.events.replaceChildren(...view.events.map(eventItem));
       el.empty.hidden = view.events.length > 0;
     }
+
+    // System log: append only what is new; start over after a reset.
+    if (view.log.length < loggedEntries) {
+      el.log.replaceChildren();
+      loggedEntries = 0;
+    }
+    if (view.log.length > loggedEntries) {
+      el.log.append(...view.log.slice(loggedEntries).map(logItem));
+      loggedEntries = view.log.length;
+      el.log.scrollTop = el.log.scrollHeight;
+    }
+    el.logCount.textContent = String(view.log.length);
+  };
+}
+
+export interface InsightsPanel {
+  show(insights: Insight[], elapsed: number): void;
+  hide(): void;
+}
+
+export function createInsightsPanel(root: HTMLElement): InsightsPanel {
+  const panel = one<HTMLElement>(root, '[data-insights-panel]');
+  const list = one<HTMLElement>(root, '[data-insights-list]');
+  const time = one<HTMLElement>(root, '[data-insights-time]');
+
+  return {
+    show(insights, elapsed) {
+      list.replaceChildren(
+        ...insights.map((insight) => {
+          const item = document.createElement('div');
+          item.className = 'insight';
+          const value = document.createElement('dd');
+          value.append(
+            text('insight-value', insight.value, 'span'),
+            text('insight-detail', insight.detail, 'span'),
+          );
+          item.append(text('insight-title', insight.title, 'dt'), value);
+          return item;
+        }),
+      );
+      time.textContent = `As of T+${formatClock(elapsed)}`;
+      panel.hidden = false;
+    },
+    hide() {
+      panel.hidden = true;
+      list.replaceChildren();
+    },
   };
 }

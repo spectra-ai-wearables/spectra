@@ -1,9 +1,10 @@
 ---
 import { home } from '../site';
+import WatchFront from './figures/WatchFront.astro';
 import Logo from './Logo.astro';
 ---
 <header class="site-header">
-  <a href={home}aria-label="Spectra home"><Logo /></a>
+  <a href={home} aria-label="Spectra home"><Logo /></a>
   <nav aria-label="Sections">
     <a href="#how">How it works</a>
     <a href="#demo">Demo</a>
@@ -15,14 +16,19 @@ import Logo from './Logo.astro';
 </header>
 
 <section class="hero">
-  <p class="eyebrow">On-board AI health monitoring for astronauts</p>
-  <h1>Turn body signals into information astronauts can use on board.</h1>
-  <p class="lede">
-    Spectra pairs a multispectral wearable with machine learning designed to run on the
-    spacecraft. It checks
-    whether a reading can be trusted, compares it with the astronaut's own pattern, and
-    explains what changed, with or without a link to Earth.
-  </p>
-  <a class="button" href="#demo">Run the demo</a>
-  <p class="hero-note">Hackathon prototype. The demo runs on synthetic data.</p>
+  <div class="hero-copy">
+    <p class="eyebrow">On-board AI health monitoring for astronauts</p>
+    <h1>Turn body signals into information astronauts can use on board.</h1>
+    <p class="lede">
+      Spectra pairs a multispectral wearable with machine learning designed to run on the
+      spacecraft. It checks whether a reading can be trusted, compares it with the astronaut's
+      own pattern, and explains what changed, with or without a link to Earth.
+    </p>
+    <a class="button" href="#demo">Run the demo</a>
+    <p class="hero-note">Hackathon prototype. The demo runs on synthetic data.</p>
+  </div>
+  <figure class="hero-figure">
+    <WatchFront />
+    <figcaption>Concept illustration</figcaption>
+  </figure>
 </section>

@@ -1,0 +1,27 @@
+---
+import Board from './figures/Board.astro';
+import Dish from './figures/Dish.astro';
+import WatchFront from './figures/WatchFront.astro';
+---
+<figure class="system">
+  <ol class="system-flow">
+    <li class="system-node">
+      <div class="system-art system-art-watch"><WatchFront /></div>
+      <p class="system-name">Wearable</p>
+      <p class="system-note">Multispectral, pulse, motion and temperature sensors on the wrist.</p>
+    </li>
+    <li class="system-link"><span>Short-range wireless</span></li>
+    <li class="system-node">
+      <div class="system-art"><Board /></div>
+      <p class="system-name">On-board server</p>
+      <p class="system-note">A Raspberry Pi running the model, the history and the event queue.</p>
+    </li>
+    <li class="system-link system-link-dashed"><span>Mission link, when available</span></li>
+    <li class="system-node">
+      <div class="system-art"><Dish /></div>
+      <p class="system-name">Ground team</p>
+      <p class="system-note">Receives a summary of each event once it gets through.</p>
+    </li>
+  </ol>
+  <figcaption>Concept illustration of the prototype design.</figcaption>
+</figure>

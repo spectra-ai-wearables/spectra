@@ -58,16 +58,16 @@
 
 /* ---------- Page load ---------- */
 
-.hero > * {
+.hero-copy > * {
   animation: rise-in 600ms var(--ease-out) both;
 }
 
-.hero > :nth-child(2) { animation-delay: 80ms; }
-.hero > :nth-child(3) { animation-delay: 160ms; }
-.hero > :nth-child(4) { animation-delay: 240ms; }
-.hero > :nth-child(5) { animation-delay: 320ms; }
+.hero-copy > :nth-child(2) { animation-delay: 80ms; }
+.hero-copy > :nth-child(3) { animation-delay: 160ms; }
+.hero-copy > :nth-child(4) { animation-delay: 240ms; }
+.hero-copy > :nth-child(5) { animation-delay: 320ms; }
 
-.hero::after {
+.hero-copy::after {
   transform-origin: left;
   animation: draw-in 900ms var(--ease-out) 450ms both;
 }
@@ -246,7 +246,7 @@ a {
 }
 
 /* Live indicator while the session plays */
-.demo[data-playing='true'] .panel-meta::before {
+.demo[data-playing='true'] .telemetry > div:first-child dd::before {
   content: '';
   display: inline-block;
   width: 0.5rem;
@@ -280,4 +280,42 @@ a {
 
 .chart-cursor {
   transition: opacity 150ms ease;
+}
+
+/* ---------- Monitoring ---------- */
+
+@keyframes trace {
+  from {
+    stroke-dashoffset: 140;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* The watch face redraws its pulse trace like a live readout. */
+.device-trace {
+  stroke-dasharray: 140;
+  animation: trace 2.4s linear infinite;
+}
+
+.device-led,
+.device-signal {
+  animation: pulse 1.6s ease-in-out infinite;
+}
+
+.hero-figure {
+  animation: rise-in 700ms var(--ease-out) 200ms both;
+}
+
+.demo[data-playing='true'] .chart-head {
+  animation: pulse 1s ease-in-out infinite;
+}
+
+.log li {
+  animation: rise-in 200ms var(--ease-out) both;
+}
+
+.panel-insights {
+  animation: rise-in 350ms var(--ease-out) both;
 }

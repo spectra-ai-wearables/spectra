@@ -44,17 +44,25 @@ const gridY = (hr: number) =>
           Link to Earth
         </button>
         <button type="button" data-fullscreen>Full screen</button>
+        <button type="button" data-logs aria-pressed="false" aria-controls="demo-log">Logs</button>
+        <button type="button" data-insights>Generate insights</button>
       </div>
       <p class="demo-badge">Synthetic data</p>
     </div>
+
+    <dl class="telemetry">
+      <div><dt>Mission clock</dt><dd>T+<span data-clock>00:00</span></dd></div>
+      <div><dt>Phase</dt><dd data-phase>Rest</dd></div>
+      <div><dt>Sensor</dt><dd data-sensor data-level="idle">Standby</dd></div>
+      <div><dt>Model score</dt><dd data-model-score data-level="idle">—</dd></div>
+      <div><dt>Link</dt><dd data-link-cell data-level="ok">Up</dd></div>
+      <div><dt>Queue</dt><dd data-queue data-level="idle">0 pending</dd></div>
+    </dl>
 
     <div class="demo-panels">
       <article class="panel panel-astronaut" aria-labelledby="panel-astronaut-title">
         <header class="panel-header">
           <h3 id="panel-astronaut-title">Astronaut dashboard</h3>
-          <p class="panel-meta">
-            <span data-phase>Rest</span> · <span data-clock>00:00</span>
-          </p>
         </header>
 
         <div class="reading" data-reading data-state="idle" aria-live="polite">
@@ -98,6 +106,7 @@ const gridY = (hr: number) =>
             ))}
             <path class="chart-band" data-band d="" />
             <path class="chart-line" data-line d="" fill="none" />
+            <circle class="chart-head" data-head r="4" cx="-10" cy="-10" />
             <line class="chart-cursor" data-cursor x1={CHART.left} x2={CHART.left} y1={CHART.top} y2={plotBottom} />
           </svg>
           <figcaption>Heart rate (bpm). Shaded band: this astronaut's reference for the activity.</figcaption>
@@ -123,6 +132,7 @@ const gridY = (hr: number) =>
         </div>
       </article>
 
+      <div class="demo-side">
       <article class="panel panel-ground" aria-labelledby="panel-ground-title">
         <header class="panel-header">
           <h3 id="panel-ground-title">Ground team</h3>
@@ -131,6 +141,27 @@ const gridY = (hr: number) =>
         <p class="events-empty" data-empty>No events received.</p>
         <ol class="events" data-events aria-live="polite"></ol>
       </article>
+
+      <article class="panel panel-insights" data-insights-panel hidden aria-labelledby="panel-insights-title">
+        <header class="panel-header">
+          <h3 id="panel-insights-title">Session insights</h3>
+          <p class="panel-meta" data-insights-time></p>
+        </header>
+        <dl class="insights" data-insights-list></dl>
+        <p class="panel-note">
+          Computed on board from this session's readings with fixed rules. A summary, not a
+          diagnosis.
+        </p>
+      </article>
+
+      <article class="panel panel-log" id="demo-log" data-log-panel hidden aria-labelledby="panel-log-title">
+        <header class="panel-header">
+          <h3 id="panel-log-title">System log</h3>
+          <p class="panel-meta"><span data-log-count>0</span> entries</p>
+        </header>
+        <ol class="log" data-log role="log" aria-label="System log" tabindex="0"></ol>
+      </article>
+      </div>
     </div>
   </div>
 </section>

@@ -57,7 +57,7 @@
 }
 
 /* The one brand flourish: five spectral bands as a hairline. */
-.hero::after {
+.hero-copy::after {
   content: '';
   display: block;
   width: min(100%, 20rem);

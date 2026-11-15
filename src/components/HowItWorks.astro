@@ -1,4 +1,6 @@
 ---
+import SystemDiagram from './SystemDiagram.astro';
+
 const steps = [
   {
     title: 'Wearable',
@@ -6,7 +8,7 @@ const steps = [
   },
   {
     title: 'On-board server',
-    text: 'A compact computer on the spacecraft receives the readings, keeps a bounded history and runs the machine-learning analysis locally.',
+    text: 'A Raspberry Pi on the spacecraft receives the readings, keeps a bounded history and runs the machine-learning model locally.',
   },
   {
     title: 'Signal quality and analysis',
@@ -29,6 +31,7 @@ const steps = [
 <section class="section" id="how">
   <p class="eyebrow">How it works</p>
   <h2 class="section-title">From the wrist to the ground, without depending on the link.</h2>
+  <SystemDiagram />
   <ol class="steps">
     {steps.map((step) => (
       <li>

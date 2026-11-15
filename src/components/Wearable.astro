@@ -1,4 +1,7 @@
 ---
+import WatchBack from './figures/WatchBack.astro';
+import WatchFront from './figures/WatchFront.astro';
+
 const sensors = [
   {
     name: 'Optical pulse sensor',
@@ -30,6 +33,19 @@ const sensors = [
 <section class="section" id="wearable">
   <p class="eyebrow">The wearable</p>
   <h2 class="section-title">Each sensor has one job.</h2>
+  <figure class="gadget">
+    <div class="gadget-views">
+      <div class="gadget-view"><WatchFront /><p>Front</p></div>
+      <div class="gadget-view"><WatchBack /><p>Back, against the skin</p></div>
+    </div>
+    <ol class="gadget-legend">
+      <li><strong>Accelerometer</strong> inside the case, for movement and reading quality.</li>
+      <li><strong>Multispectral ring</strong>, eight bands from 415 to 680 nm. <span class="tag">Experimental</span></li>
+      <li><strong>Optical pulse sensor</strong>, two emitters and a photodiode.</li>
+      <li><strong>Contact pad</strong> for skin temperature.</li>
+    </ol>
+    <figcaption>Concept illustration. The prototype hardware is not built yet.</figcaption>
+  </figure>
   <table class="sensor-table">
     <thead>
       <tr>

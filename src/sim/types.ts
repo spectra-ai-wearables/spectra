@@ -32,8 +32,10 @@ export interface WindowResult {
   tEnd: number;
   phase: Phase;
   quality: Quality;
-  /** Median residual divided by the baseline sigma; null when unreliable. */
+  /** Signed deviation in units of the expected spread; null when unreliable. */
   score: number | null;
+  /** Median heart-rate difference from the reference, in bpm; null when unreliable. */
+  deviationBpm: number | null;
   deviating: boolean;
   /** Consecutive deviating windows, this one included. */
   streak: number;

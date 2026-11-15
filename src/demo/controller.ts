@@ -1,6 +1,9 @@
 import { WINDOW_SIZE, analyzeSession } from '../sim/anomaly';
 import { SESSION_LENGTH } from '../sim/baseline';
 import { explain, toEvent } from '../sim/explain';
+import { analyzeWithModel } from '../ml/detector';
+import storedModel from '../ml/model.json';
+import type { Model } from '../ml/network';
 import { generateSession } from '../sim/generator';
 import { createLinkQueue } from '../sim/link';
 import type { LinkQueue } from '../sim/link';
@@ -24,7 +27,10 @@ export interface DemoView {
   connected: boolean;
   samples: Sample[];
   latest: Sample | null;
+  /** Latest window as read by the on-board model; drives the state shown. */
   result: WindowResult | null;
+  /** The same window as read by the statistical baseline, for comparison. */
+  baseline: WindowResult | null;
   explanation: Explanation | null;
   events: QueuedEvent[];
 }
@@ -39,10 +45,13 @@ export interface Demo {
   setConnected(connected: boolean): void;
 }
 
+const model = storedModel as Model;
+
 export function createDemo(initial: ScenarioId = 'usual'): Demo {
   let scenario = initial;
   let samples: Sample[] = [];
   let results: WindowResult[] = [];
+  let baselineResults: WindowResult[] = [];
   let link: LinkQueue = createLinkQueue();
   let clock = 0;
   let playing = false;
@@ -51,7 +60,8 @@ export function createDemo(initial: ScenarioId = 'usual'): Demo {
   function load(next: ScenarioId) {
     scenario = next;
     samples = generateSession(next);
-    results = analyzeSession(samples);
+    results = analyzeWithModel(samples, model);
+    baselineResults = analyzeSession(samples);
     link = createLinkQueue();
     clock = 0;
     playing = false;
@@ -111,6 +121,7 @@ export function createDemo(initial: ScenarioId = 'usual'): Demo {
         samples: samples.slice(0, elapsed),
         latest: elapsed > 0 ? samples[elapsed - 1] : null,
         result,
+        baseline: windows > 0 ? baselineResults[windows - 1] : null,
         explanation: result ? explain(result) : null,
         events,
       };

@@ -6,6 +6,7 @@ import {
   expectedHr,
   phaseAt,
 } from './baseline';
+import { gaussian, mulberry32 } from './random';
 import type { Phase, Sample, ScenarioId } from './types';
 
 type Range = readonly [start: number, end: number];
@@ -34,15 +35,16 @@ const SPECTRAL_BASE = [0.18, 0.26, 0.35, 0.47, 0.58, 0.66, 0.52, 0.4];
 
 const PHASE_MOTION: Record<Phase, number> = { rest: 0.05, exercise: 0.6, recovery: 0.08 };
 
-function mulberry32(seed: number): () => number {
-  let a = seed >>> 0;
-  return () => {
-    a = (a + 0x6d2b79f5) >>> 0;
-    let x = a;
-    x = Math.imul(x ^ (x >>> 15), x | 1);
-    x ^= x + Math.imul(x ^ (x >>> 7), x | 61);
-    return ((x ^ (x >>> 14)) >>> 0) / 4294967296;
-  };
+export interface SessionOptions {
+  /** Overrides the scenario's fixed seed, to produce a different session. */
+  seed?: number;
+  /** Overrides the scenario's recovery time constant, in seconds. */
+  recoveryTau?: number;
+  /**
+   * Adds session-to-session variation: the same person does not recover in
+   * exactly the same way twice. Off by default so the demo scenarios stay fixed.
+   */
+  vary?: boolean;
 }
 
 const clamp01 = (value: number) => Math.min(1, Math.max(0, value));
@@ -50,11 +52,19 @@ const round = (value: number, digits: number) => Number(value.toFixed(digits));
 const inRange = (range: Range | null, t: number) =>
   range !== null && t >= range[0] && t < range[1];
 
-export function generateSession(scenario: ScenarioId): Sample[] {
+export function generateSession(scenario: ScenarioId, options: SessionOptions = {}): Sample[] {
   const config = SCENARIOS[scenario];
-  const random = mulberry32(config.seed);
-  const gauss = () =>
-    Math.sqrt(-2 * Math.log(1 - random())) * Math.cos(2 * Math.PI * random());
+  const seed = options.seed ?? config.seed;
+  const gauss = gaussian(mulberry32(seed));
+
+  // Variation uses its own stream so it never shifts the measurement noise.
+  let recoveryTau = options.recoveryTau ?? config.recoveryTau;
+  let restingOffset = 0;
+  if (options.vary) {
+    const random = mulberry32(seed ^ 0x9e3779b9);
+    recoveryTau *= 0.85 + 0.3 * random();
+    restingOffset = 1.5 * gaussian(random)();
+  }
 
   const samples: Sample[] = [];
   for (let t = 0; t < SESSION_LENGTH; t++) {
@@ -76,7 +86,7 @@ export function generateSession(scenario: ScenarioId): Sample[] {
       continue;
     }
 
-    const trueHr = expectedHr(t, config.recoveryTau);
+    const trueHr = expectedHr(t, recoveryTau) + restingOffset;
     const effort = (trueHr - RESTING_HR) / (EXERCISE_HR - RESTING_HR);
     samples.push({
       t,

@@ -8,7 +8,7 @@ export const DEVIATION_THRESHOLD = 3;
 /** Consecutive deviating windows required before the user is asked to verify. */
 export const PERSISTENCE = 3;
 
-function median(values: number[]): number {
+export function median(values: number[]): number {
   const sorted = [...values].sort((a, b) => a - b);
   const mid = Math.floor(sorted.length / 2);
   return sorted.length % 2 === 0 ? (sorted[mid - 1] + sorted[mid]) / 2 : sorted[mid];
@@ -29,17 +29,26 @@ export function analyzeSession(samples: Sample[]): WindowResult[] {
 
     if (!frame.quality.reliable) {
       streak = 0;
-      results.push({ ...frame, score: null, deviating: false, streak, state: 'insufficient-data' });
+      results.push({
+        ...frame,
+        score: null,
+        deviationBpm: null,
+        deviating: false,
+        streak,
+        state: 'insufficient-data',
+      });
       continue;
     }
 
     const residuals = window.flatMap((s) => (s.hr === null ? [] : [s.hr - expectedHr(s.t)]));
-    const score = median(residuals) / BASELINE_SIGMA;
+    const deviationBpm = median(residuals);
+    const score = deviationBpm / BASELINE_SIGMA;
     const deviating = Math.abs(score) >= DEVIATION_THRESHOLD;
     streak = deviating ? streak + 1 : 0;
     results.push({
       ...frame,
       score,
+      deviationBpm,
       deviating,
       streak,
       state: streak >= PERSISTENCE ? 'change-to-verify' : 'within-pattern',

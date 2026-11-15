@@ -20,6 +20,7 @@ describe('createDemo', () => {
       connected: true,
       latest: null,
       result: null,
+      baseline: null,
       explanation: null,
     });
     expect(view.samples).toEqual([]);
@@ -69,16 +70,27 @@ describe('createDemo', () => {
 
   test('atypical recovery queues one event and holds it while the link is down', () => {
     const demo = createDemo('atypical');
-    run(demo, 189);
+    run(demo, 179);
     expect(demo.view().events).toEqual([]);
     demo.step();
     expect(demo.view().explanation?.label).toBe('Change to verify');
-    run(demo, SESSION_LENGTH - 190);
+    run(demo, SESSION_LENGTH - 180);
     const view = demo.view();
     expect(view.events).toHaveLength(1);
     expect(view.events[0].stage).toBe('waiting');
     expect(view.finished).toBe(true);
     expect(view.settled).toBe(false);
+  });
+
+  test('shows the statistical baseline beside the model for the same window', () => {
+    const demo = createDemo('atypical');
+    run(demo, 180);
+    const early = demo.view();
+    expect(early.result?.tStart).toBe(early.baseline?.tStart);
+    expect(early.result?.state).toBe('change-to-verify');
+    expect(early.baseline?.state).toBe('within-pattern');
+    run(demo, WINDOW_SIZE);
+    expect(demo.view().baseline?.state).toBe('change-to-verify');
   });
 
   test('the held event reaches the ground after the link returns', () => {

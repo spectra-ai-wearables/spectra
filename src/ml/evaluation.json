@@ -1,0 +1,62 @@
+[
+  {
+    "id": "usual",
+    "label": "Usual recovery",
+    "recoveryTau": 35,
+    "alertExpected": false,
+    "sessions": 300,
+    "baseline": {
+      "alerts": 0,
+      "medianDelay": null
+    },
+    "model": {
+      "alerts": 0,
+      "medianDelay": null
+    }
+  },
+  {
+    "id": "slight",
+    "label": "Slightly slow recovery",
+    "recoveryTau": 50,
+    "alertExpected": true,
+    "sessions": 300,
+    "baseline": {
+      "alerts": 25,
+      "medianDelay": 60
+    },
+    "model": {
+      "alerts": 194,
+      "medianDelay": 40
+    }
+  },
+  {
+    "id": "moderate",
+    "label": "Moderately slow recovery",
+    "recoveryTau": 70,
+    "alertExpected": true,
+    "sessions": 300,
+    "baseline": {
+      "alerts": 288,
+      "medianDelay": 50
+    },
+    "model": {
+      "alerts": 300,
+      "medianDelay": 40
+    }
+  },
+  {
+    "id": "marked",
+    "label": "Markedly slow recovery",
+    "recoveryTau": 140,
+    "alertExpected": true,
+    "sessions": 300,
+    "baseline": {
+      "alerts": 300,
+      "medianDelay": 40
+    },
+    "model": {
+      "alerts": 300,
+      "medianDelay": 30
+    }
+  }
+]

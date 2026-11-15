@@ -1,5 +1,4 @@
 import { WINDOW_SIZE } from './anomaly';
-import { BASELINE_SIGMA } from './baseline';
 import type {
   Explanation,
   MissionEvent,
@@ -54,7 +53,7 @@ export function explain(result: WindowResult): Explanation {
   if (state === 'change-to-verify') {
     const score = result.score ?? 0;
     const direction = score >= 0 ? 'above' : 'below';
-    const bpm = Math.round(Math.abs(score) * BASELINE_SIGMA);
+    const bpm = Math.round(Math.abs(result.deviationBpm ?? 0));
     const seconds = result.streak * WINDOW_SIZE;
     return {
       state,

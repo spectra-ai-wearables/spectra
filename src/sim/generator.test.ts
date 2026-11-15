@@ -46,6 +46,26 @@ describe('generateSession', () => {
     }
   });
 
+  test('a different seed produces a different session of the same scenario', () => {
+    const a = generateSession('usual', { seed: 1 });
+    const b = generateSession('usual', { seed: 2 });
+    expect(a).not.toEqual(b);
+    expect(generateSession('usual', { seed: 1 })).toEqual(a);
+  });
+
+  test('variation changes the session but keeps it deterministic', () => {
+    const plain = generateSession('usual', { seed: 5 });
+    const varied = generateSession('usual', { seed: 5, vary: true });
+    expect(varied).not.toEqual(plain);
+    expect(generateSession('usual', { seed: 5, vary: true })).toEqual(varied);
+  });
+
+  test('a longer recovery time constant keeps heart rate higher', () => {
+    const fast = generateSession('usual', { seed: 5 })[200].hr as number;
+    const slow = generateSession('usual', { seed: 5, recoveryTau: 70 })[200].hr as number;
+    expect(slow - fast).toBeGreaterThan(8);
+  });
+
   test('atypical scenario keeps heart rate elevated during recovery', () => {
     const usual = generateSession('usual')[200].hr as number;
     const atypical = generateSession('atypical')[200].hr as number;

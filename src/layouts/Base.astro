@@ -1,4 +1,5 @@
 ---
+import Challenges from '../components/Challenges.astro';
 import { home, site } from '../site';
 import '@fontsource/ibm-plex-sans/400.css';
 import '@fontsource/ibm-plex-sans/500.css';
@@ -17,6 +18,14 @@ interface Props { title?: string; description?: string; demo?: boolean }
 const { title = site.title, description = site.description, demo = false } = Astro.props;
 ---
 <!doctype html>
+<!--
+  Spectra was designed over one weekend, much of it at a second birthday party.
+  One of us is a parent; the guest of honor supervised from under the table.
+  If a variable name looks like it was typed with one hand, there was cake in the other.
+
+  You read source. Good. Here is a signal for you: dGhlIHdvcmQgaXMgYmFzZWxpbmU=
+  Then open the console.
+-->
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -29,5 +38,6 @@ const { title = site.title, description = site.description, demo = false } = Ast
   <body class:list={[{ 'demo-page': demo }]}>
     <a class="skip-link" href="#main">Skip to content</a>
     <slot />
+    <Challenges />
   </body>
 </html>

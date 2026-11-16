@@ -255,3 +255,100 @@ a {
 .panel-insights {
   animation: rise-in 350ms var(--ease-out) both;
 }
+
+/* ---------- Page to page ---------- */
+
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition {
+    navigation: auto;
+  }
+}
+
+/* ---------- Hero: sense, understand, connect ---------- */
+
+@keyframes light-up {
+  from {
+    opacity: 0.25;
+  }
+}
+
+.hero-foot span {
+  animation: light-up 400ms ease-out both;
+}
+
+.hero-foot span:nth-child(1) { animation-delay: 500ms; }
+.hero-foot span:nth-child(2) { animation-delay: 850ms; }
+.hero-foot span:nth-child(3) { animation-delay: 1200ms; }
+
+/* ---------- Term cards ---------- */
+
+.term-card {
+  opacity: 0;
+  transform: translateY(4px);
+  transition:
+    opacity 150ms ease-out,
+    transform 150ms var(--ease-out),
+    display 150ms allow-discrete,
+    overlay 150ms allow-discrete;
+}
+
+.term-card:popover-open {
+  opacity: 1;
+  transform: none;
+}
+
+@starting-style {
+  .term-card:popover-open {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+/* ---------- Console ---------- */
+
+@keyframes settle {
+  from {
+    opacity: 0.2;
+    transform: translateX(-4px);
+  }
+}
+
+/* A different animation name per state, so each change of state replays it. */
+@keyframes state-ok { from { opacity: 0.2; transform: translateX(-4px); } }
+@keyframes state-warn { from { opacity: 0.2; transform: translateX(-4px); } }
+@keyframes state-alert { from { opacity: 0.2; transform: translateX(-4px); } }
+@keyframes state-no-data { from { opacity: 0.2; transform: translateX(-4px); } }
+
+.crew-card[data-state='ok'] .crew-state { animation: state-ok 300ms var(--ease-out); }
+.crew-card[data-state='warn'] .crew-state { animation: state-warn 300ms var(--ease-out); }
+.crew-card[data-state='alert'] .crew-state { animation: state-alert 300ms var(--ease-out); }
+.crew-card[data-state='no-data'] .crew-state { animation: state-no-data 300ms var(--ease-out); }
+
+.crew-card {
+  transition:
+    border-color 200ms ease,
+    transform 150ms var(--ease-out);
+}
+
+.heat i {
+  animation: fade-in 300ms ease-out;
+}
+
+.path-track i {
+  transition: transform 100ms linear;
+}
+
+.transfers tbody tr,
+.brief span {
+  animation: settle 250ms var(--ease-out);
+}
+
+.demo-bar [data-deliver]:not([hidden]) {
+  animation: rise-in 300ms var(--ease-out);
+}
+
+@media (hover: hover) {
+  .crew-card:hover {
+    transform: translateY(-2px);
+  }
+}

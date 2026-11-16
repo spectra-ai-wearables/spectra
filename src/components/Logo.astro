@@ -4,11 +4,11 @@ interface Props {
 }
 const { size = 28 } = Astro.props;
 const bars = [
-  { x: 2, height: 10 },
-  { x: 8, height: 18 },
-  { x: 14, height: 26 },
-  { x: 20, height: 20 },
-  { x: 26, height: 12 },
+  { x: 2, height: 10, nm: 590, glyph: 'H' },
+  { x: 8, height: 18, nm: 445, glyph: 'I' },
+  { x: 14, height: 26, nm: 680, glyph: 'T' },
+  { x: 20, height: 20, nm: 415, glyph: 'L' },
+  { x: 26, height: 12, nm: 515, glyph: 'G' },
 ];
 ---
 <span class="logo">
@@ -21,6 +21,8 @@ const bars = [
         width="4"
         height={bar.height}
         rx="2"
+        data-nm={bar.nm}
+        data-glyph={bar.glyph}
       />
     ))}
   </svg>

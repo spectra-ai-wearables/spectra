@@ -1,0 +1,88 @@
+---
+/**
+ * Three small puzzles for whoever opens the console. Nothing here is needed to
+ * use the site, and nothing breaks if the console stays closed. Answers are
+ * checked against hashes, so they are not readable in the page.
+ */
+import { sha256 } from '../sim/sha256';
+import { DEFAULT_DATE } from '../sim/scenarios/types';
+import { missionDay } from '../sim/sources/horizons';
+
+const SPEED_OF_LIGHT_KM_S = 299_792.458;
+const day = missionDay(DEFAULT_DATE)!;
+const km = Math.round(day.distanceKm);
+
+const hashes = [
+  'bd8efd402be265b5d170d23e01cfc0077e9e65201b1bedfd106f52564238ccff',
+  sha256(`spectra:2:${Math.round(km / SPEED_OF_LIGHT_KM_S)}`),
+  'cb96da4b7b7936cc051bbff3d7b8408892d7e2f80a0229bbffe52945e6a14031',
+];
+const prompts = [
+  'Signal. A message is hidden in a comment near the top of this page\'s HTML. Decode it and send the word.',
+  `Light time. On ${DEFAULT_DATE} Mars was ${km.toLocaleString('en-US')} km from Earth. How many seconds does a message take, one way? Round to the nearest second.`,
+  'Spectrum. Each bar of the logo carries a wavelength in data-nm. Put them in order, shortest first, and read what they spell.',
+];
+---
+<script is:inline define:vars={{ hashes, prompts }}>
+  (() => {
+    const KEY = 'spectra:challenges';
+    const read = () => {
+      try {
+        const value = JSON.parse(localStorage.getItem(KEY) ?? '[]');
+        return Array.isArray(value) ? value.filter((n) => [1, 2, 3].includes(n)) : [];
+      } catch {
+        return [];
+      }
+    };
+    const write = (value) => {
+      try {
+        localStorage.setItem(KEY, JSON.stringify(value));
+      } catch {
+        // Storage is unavailable: progress lasts for this visit only.
+      }
+    };
+    let solved = read();
+
+    const apply = () => {
+      const done = solved.length === 3;
+      document.documentElement.toggleAttribute('data-spectrum', done);
+      for (const badge of document.querySelectorAll('[data-badge]')) badge.hidden = !done;
+    };
+
+    const digest = async (text) => {
+      const bytes = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+      return [...new Uint8Array(bytes)].map((byte) => byte.toString(16).padStart(2, '0')).join('');
+    };
+
+    window.spectra = {
+      help() {
+        console.log(
+          prompts.map((prompt, i) => `${solved.includes(i + 1) ? '[solved]' : '[ open ]'} ${i + 1}. ${prompt}`).join('\n') +
+            '\n\nAnswer with spectra.solve(number, answer). Start over with spectra.reset().',
+        );
+      },
+      async solve(number, answer) {
+        if (![1, 2, 3].includes(number)) return console.log('There are three challenges: 1, 2 and 3.');
+        const guess = await digest(`spectra:${number}:${String(answer).trim().toLowerCase()}`);
+        if (guess !== hashes[number - 1]) return console.log('Not yet. The signal is there; keep looking.');
+        if (!solved.includes(number)) solved = [...solved, number];
+        write(solved);
+        apply();
+        console.log(solved.length === 3 ? 'All three solved. Full spectrum unlocked: look at the page.' : `Challenge ${number} solved. ${3 - solved.length} to go.`);
+      },
+      reset() {
+        solved = [];
+        write(solved);
+        apply();
+        console.log('Progress cleared.');
+      },
+    };
+
+    apply();
+    console.log(
+      '%c ▂▅█▆▃  SPECTRA %c\nHuman signals. Onboard intelligence.\nThree challenges are hidden in this site. Type spectra.help() to begin.',
+      'font: 600 18px monospace; color: #39d98a',
+      'font: 12px monospace',
+    );
+  })();
+</script>

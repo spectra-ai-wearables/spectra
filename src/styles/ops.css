@@ -684,3 +684,39 @@
 .sources-table a {
   color: var(--text);
 }
+
+/* ---------- Renders, footer and the reward for the curious ---------- */
+
+.render-note {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.hero-stage .render-note {
+  padding-inline: var(--gutter);
+  text-align: right;
+}
+
+.badge-spectrum {
+  padding: 2px var(--space-2);
+  border: 1px solid var(--band-3);
+  border-radius: 3px;
+  color: var(--text);
+}
+
+:root[data-spectrum] .site-header {
+  border-image: var(--spectrum) 1;
+}
+
+:root[data-spectrum] .section::before {
+  background: var(--spectrum);
+  opacity: 0.5;
+}
+
+:root[data-spectrum] ::selection {
+  background: color-mix(in srgb, var(--band-3) 40%, transparent);
+}

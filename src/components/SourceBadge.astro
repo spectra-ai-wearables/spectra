@@ -7,6 +7,6 @@ interface Props {
 }
 const { kind, source, date } = Astro.props;
 ---
-<span class="source" data-kind={kind}>
+<span class="origin" data-kind={kind}>
   {kind === 'synthetic' ? 'Synthetic' : `${source} data · snapshot ${date}`}
 </span>

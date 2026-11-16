@@ -1,0 +1,72 @@
+---
+/**
+ * A technical term with its explanation one click, tap, hover or focus away.
+ * The popover is native, so it opens without JavaScript, closes with Esc and
+ * dismisses on an outside click; the script below only adds hover and focus.
+ */
+import { STATUS_LABEL, term } from '../terms';
+
+interface Props {
+  id: string;
+}
+const entry = term(Astro.props.id);
+const uid = `term-${entry.id}-${Math.random().toString(36).slice(2, 8)}`;
+---
+<button type="button" class="term" popovertarget={uid} aria-describedby={uid} data-term><slot>{entry.name}</slot></button><span
+  class="term-card" id={uid} popover role="note">
+  <span class="term-name">{entry.name}</span>
+  <span class="term-status" data-status={entry.status}>{STATUS_LABEL[entry.status]}</span>
+  <span class="term-plain">{entry.plain}</span>
+  <span class="term-detail">{entry.detail}</span>
+  {entry.formula && <code class="term-formula">{entry.formula}</code>}
+  {entry.file && <span class="term-file">{entry.file}</span>}
+</span>
+
+<script>
+  const supported = 'showPopover' in HTMLElement.prototype;
+  const HIDE_DELAY = 160;
+
+  for (const button of document.querySelectorAll<HTMLButtonElement>('[data-term]')) {
+    const card = document.getElementById(button.getAttribute('popovertarget') ?? '');
+    if (!card || !supported) continue;
+    let timer: number | undefined;
+
+    const place = () => {
+      const anchor = button.getBoundingClientRect();
+      const width = Math.min(352, window.innerWidth - 24);
+      const left = Math.min(Math.max(12, anchor.left), window.innerWidth - width - 12);
+      const below = anchor.bottom + 8;
+      card.style.width = `${width}px`;
+      card.style.left = `${left}px`;
+      const height = card.offsetHeight;
+      card.style.top = `${below + height > window.innerHeight - 12 ? Math.max(12, anchor.top - height - 8) : below}px`;
+    };
+    let openedAt = 0;
+    const show = () => {
+      window.clearTimeout(timer);
+      if (!card.matches(':popover-open')) {
+        card.showPopover();
+        openedAt = performance.now();
+      }
+      place();
+    };
+    // A click that lands right after hover or focus opened the card keeps it open.
+    button.addEventListener('click', (event) => {
+      event.preventDefault();
+      if (card.matches(':popover-open') && performance.now() - openedAt > 400) card.hidePopover();
+      else show();
+    });
+    const hideSoon = () => {
+      timer = window.setTimeout(() => {
+        if (card.matches(':popover-open') && !card.matches(':hover') && document.activeElement !== button) card.hidePopover();
+      }, HIDE_DELAY);
+    };
+
+    card.addEventListener('toggle', place);
+    button.addEventListener('pointerenter', (event) => event.pointerType === 'mouse' && show());
+    button.addEventListener('pointerleave', hideSoon);
+    card.addEventListener('pointerleave', hideSoon);
+    button.addEventListener('focus', () => button.matches(':focus-visible') && show());
+    button.addEventListener('blur', hideSoon);
+  }
+</script>

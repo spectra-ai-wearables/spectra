@@ -1,6 +1,7 @@
 ---
 import evaluation from '../ml/evaluation.json';
 import model from '../ml/model.json';
+import TechTerm from './TechTerm.astro';
 
 const { training } = model;
 const sessionsPerCase = evaluation[0].sessions;
@@ -14,7 +15,7 @@ function outcome(alerts: number, sessions: number, medianDelay: number | null, a
 }
 ---
 <section class="section" id="model">
-  <p class="eyebrow">05 / Intelligence</p>
+  <p class="eyebrow">06 / Intelligence</p>
   <h2 class="section-title">Machine learning that runs where the astronaut is.</h2>
   <p class="section-lede">
     The model learns one astronaut's own response to an activity and reads every new window
@@ -25,24 +26,27 @@ function outcome(alerts: number, sessions: number, medianDelay: number | null, a
     <li>
       <h3>Can this reading be trusted?</h3>
       <p>
-        Lost contact, missing data and motion are detected first. An unreliable window is
-        never scored; the astronaut is asked to adjust the band and measure again.
+        A <TechTerm id="signal-quality">signal quality check</TechTerm> looks for lost contact,
+        missing data and motion first. An unreliable window is never scored; the astronaut is
+        asked to adjust the band and measure again.
       </p>
     </li>
     <li>
       <h3>How does it compare with this person?</h3>
       <p>
-        A neural network predicts this astronaut's heart rate and skin temperature for the
+        A <TechTerm id="reference-model">neural network</TechTerm> predicts this astronaut's heart rate and skin temperature for the
         current moment of the activity. It is told the schedule, never the expected values:
-        it learns those, and how much they normally vary, from reference sessions.
+        it learns those, and how much they normally vary, from reference sessions. The gap
+        between a window and the prediction is its <TechTerm id="deviation-score">deviation score</TechTerm>.
       </p>
     </li>
     <li>
       <h3>Does the change persist?</h3>
       <p>
-        A single odd reading is not an alert. Spectra asks for verification only when a
-        deviation holds across consecutive windows, and it says which signal changed and
-        for how long.
+        A single odd reading is not an alert. Spectra raises one only when a deviation shows
+        <TechTerm id="persistence">persistence</TechTerm> across consecutive windows. A
+        <TechTerm id="cusum">trend sum</TechTerm> holds a warning while small deviations add up, and fixed
+        rules name the <TechTerm id="likely-cause">likely cause</TechTerm>: movement, sensor, cabin or body.
       </p>
     </li>
   </ol>
@@ -56,7 +60,7 @@ function outcome(alerts: number, sessions: number, medianDelay: number | null, a
 
   <h3 class="subsection-title">Does the model add anything?</h3>
   <p>
-    We ran the model and a plain statistical baseline on {sessionsPerCase} sessions per
+    We ran the model and a plain <TechTerm id="statistical-baseline">statistical baseline</TechTerm> on {sessionsPerCase} sessions per
     case. None of these sessions was used to train or tune the model. Both use the same
     rule: three consecutive windows above the threshold.
   </p>

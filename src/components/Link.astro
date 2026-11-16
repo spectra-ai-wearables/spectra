@@ -1,0 +1,77 @@
+---
+import { LIGHT_SECONDS_PER_AU, blackouts, coverage, ephemeris, horizonsSnapshot } from '../sim/sources/horizons';
+import { ALERT_BYTES, BUNDLE_OVERHEAD_BYTES, RAW_WINDOW_BYTES, RESIDUAL_BYTES } from '../sim/twin';
+import { home } from '../site';
+import SourceBadge from './SourceBadge.astro';
+import TechTerm from './TechTerm.astro';
+
+const minutes = ephemeris.distanceAu.map((au) => (au * LIGHT_SECONDS_PER_AU) / 60);
+const range = coverage();
+const longest = blackouts().reduce((best, window) => (window.days > best.days ? window : best));
+
+const principles = [
+  {
+    name: 'Send the surprise, not the signal',
+    text: 'The ground runs a copy of each astronaut’s reference model. The server sends only what that copy could not predict. With no link, the ground keeps projecting and shows how unsure it is.',
+    term: 'predictive-coding',
+  },
+  {
+    name: 'Store and forward, with custody',
+    text: 'Data waits on board until the next hop can take it. Nothing depends on both ends being awake at once.',
+    term: 'bundle-protocol',
+  },
+  {
+    name: 'Priority by clinical value',
+    text: `An alert summary of ${BUNDLE_OVERHEAD_BYTES + ALERT_BYTES} bytes leaves first. Routine updates follow. Raw windows travel only when the ground asks.`,
+    term: null,
+  },
+  {
+    name: 'Never wait for a resend',
+    text: 'Asking again costs a round trip of up to 40 minutes. Each message leaves with repair packets, and the ground rebuilds it from whichever ones arrive.',
+    term: 'erasure-coding',
+  },
+  {
+    name: 'A record the ground can verify',
+    text: 'Events go into an append-only log. The ground can prove nothing is missing, ask only for the gaps, and merge the same record twice without harm.',
+    term: 'ledger',
+  },
+  {
+    name: 'Scheduled around contact',
+    text: 'The server knows when the link will be there and what fits in each pass. A solar conjunction is planned for, not discovered.',
+    term: null,
+  },
+];
+---
+<section class="section" id="link">
+  <p class="eyebrow">04 / Spectra Link</p>
+  <h2 class="section-title">The crew is never waiting on Earth. Earth is never left guessing.</h2>
+  <p class="section-lede">
+    Between Mars and Earth a message takes {Math.min(...minutes).toFixed(0)} to {Math.max(...minutes).toFixed(0)} minutes
+    each way, and for {longest.days} days around {longest.start.slice(0, 4)} the Sun blocks the path entirely.
+    Spectra Link is our proposal for a link that works anyway.
+  </p>
+  <p class="link-basis">
+    <SourceBadge kind="data" source="JPL Horizons" date={horizonsSnapshot.retrievedAt} />
+    Light time and blackout from the Earth to Mars ephemeris, {range.start.slice(0, 4)} to {range.end.slice(0, 4)}.
+  </p>
+
+  <ol class="steps principles">
+    {principles.map((principle) => (
+      <li>
+        <h3>{principle.name}</h3>
+        <p>{principle.text}</p>
+        {principle.term && <p class="principle-term"><TechTerm id={principle.term} /></p>}
+      </li>
+    ))}
+  </ol>
+
+  <p>
+    A quiet ten-second window costs nothing to send. One that leaves the pattern costs {RESIDUAL_BYTES} bytes,
+    against {RAW_WINDOW_BYTES} for the raw readings.
+  </p>
+  <p class="source">
+    Spectra Link is a proposal. The simulator plays it out with a delay, outages, packet loss and a
+    server restart; it does not implement the network standards it names.{' '}
+    <a href={`${home}demo/`}>Disturb the link in the simulator</a>.
+  </p>
+</section>

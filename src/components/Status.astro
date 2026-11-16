@@ -4,7 +4,7 @@ import model from '../ml/model.json';
 const { training } = model;
 ---
 <section class="section" id="status">
-  <p class="eyebrow">06 / Project status</p>
+  <p class="eyebrow">08 / Project status</p>
   <h2 class="section-title">Built to explore. Clear about its limits.</h2>
   <p class="section-lede">The software is running. The hardware is a design proposal. Here is where the project stands.</p>
 
@@ -16,6 +16,7 @@ const { training } = model;
         <li>The onboard server built around a Raspberry Pi, and its hand-off to spacecraft communications.</li>
         <li>A model trained on each astronaut's measured reference sessions.</li>
         <li>Motion and multispectral channels as model inputs. Whether they help is untested.</li>
+        <li>Spectra Link on real network standards: Bundle Protocol, bundle security and a fountain code.</li>
       </ul>
     </div>
     <div class="status-col">
@@ -24,7 +25,9 @@ const { training } = model;
         <li>The interactive demo in your browser, on synthetic data.</li>
         <li>A neural network of {training.parameters} parameters, trained on {training.sessions} synthetic sessions.</li>
         <li>A statistical baseline beside it, and an evaluation on held-out synthetic sessions.</li>
-        <li>A simulated mission link with interruptions and delay.</li>
+        <li>Crew monitors with a trend warning, a likely cause and incident grouping, all rule-based.</li>
+        <li>A simulated link with real light time and solar blackouts, priorities, packet loss and a verifiable event log.</li>
+        <li>A ground copy of the reference model that receives only what it could not predict.</li>
       </ul>
     </div>
   </div>
@@ -35,5 +38,6 @@ const { training } = model;
     <li>It does not measure glucose or cuffless blood pressure.</li>
     <li>It does not recommend treatment. Clinical guidance belongs to protocols reviewed by professionals.</li>
     <li>Results on synthetic data show that the system works technically, not how it performs clinically.</li>
+    <li>The likely cause is a rule of thumb. It separates sensor, cabin and body in the simulator; real data would be harder.</li>
   </ul>
 </section>

@@ -1,0 +1,27 @@
+---
+import { STATUS_LABEL, TERMS } from '../terms';
+---
+<section class="section" id="glossary">
+  <p class="eyebrow">09 / Glossary</p>
+  <h2 class="section-title">Every technique, in plain terms.</h2>
+  <p class="section-lede">
+    The same explanations that open from the underlined terms, in one place. Each says whether the
+    demo does it or the design proposes it.
+  </p>
+  <dl class="glossary">
+    {TERMS.map((entry) => (
+      <div id={`glossary-${entry.id}`}>
+        <dt>
+          {entry.name}
+          <span class="term-status" data-status={entry.status}>{STATUS_LABEL[entry.status]}</span>
+        </dt>
+        <dd>
+          <p>{entry.plain}</p>
+          <p class="glossary-detail">{entry.detail}</p>
+          {entry.formula && <code class="term-formula">{entry.formula}</code>}
+          {entry.file && <p class="term-file">{entry.file}</p>}
+        </dd>
+      </div>
+    ))}
+  </dl>
+</section>

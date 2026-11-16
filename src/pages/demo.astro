@@ -14,8 +14,8 @@ import products from '../assets/products.png';
         <a class="back-link" href={home}>← Back to the system</a>
         <p class="eyebrow"><span class="signal-dot" aria-hidden="true"></span> Interactive mission simulator</p>
         <h1 id="mission-title">Intelligence.<br /><span>Independent of distance.</span></h1>
-        <p>From the first reading to the ground team. Explore how Spectra checks signals,
-          recognizes changes and keeps events safe when the link is interrupted.</p>
+        <p>From the first reading to the ground team. Follow four astronauts through a session, then watch
+          what reaches Earth, when, and at what cost in bytes.</p>
       </div>
       <figure class="mission-product">
         <Image src={products} alt="The Spectra screenless wristband and onboard server concept."
@@ -34,10 +34,11 @@ import products from '../assets/products.png';
     <section class="mission-guide" aria-labelledby="guide-title">
       <div><p class="eyebrow">Reading the simulation</p><h2 id="guide-title">A signal.<br />Not a diagnosis.</h2></div>
       <div>
-        <p>A small neural network compares heart rate and skin temperature with a learned reference.
-          The statistical baseline runs alongside it. Unreliable readings are excluded before scoring.</p>
-        <p>Three consecutive windows above the deviation threshold ask for a check.
-          Events wait locally when the link is down and are delivered after the simulated transmission delay.</p>
+        <p>A small neural network compares each astronaut's heart rate and skin temperature with a learned
+          reference. Unreliable windows are discarded before scoring. Three windows in a row above the
+          threshold raise an alert, with a likely cause attached.</p>
+        <p>The ground sees everything one light-time late. The delay and the solar blackouts come from the
+          ephemeris for the mission date; the session then fast-forwards so you can watch the alert arrive.</p>
         <a class="text-link" href={`${home}#model`}>Explore the model and evaluation ↗</a>
       </div>
     </section>

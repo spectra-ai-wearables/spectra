@@ -1,0 +1,97 @@
+---
+import { activeDownlinks, antennas, dsnSnapshot } from '../sim/sources/dsn';
+import { blackouts, ephemeris, horizonsSnapshot } from '../sim/sources/horizons';
+import { donkiSnapshot, kpIndex, particleEvents, protonFlux, swpcSnapshot, xrayFlux } from '../sim/sources/spaceWeather';
+
+const sources = [
+  {
+    name: 'NASA/JPL Horizons',
+    url: 'https://ssd.jpl.nasa.gov/horizons/',
+    holds: `${ephemeris.distanceAu.length} daily values of the Earth to Mars distance and the Sun-Earth-Mars angle`,
+    use: `One-way light time for the mission date, and the ${blackouts().length} solar blackouts in the period`,
+    snapshot: horizonsSnapshot,
+  },
+  {
+    name: 'NOAA Space Weather Prediction Center',
+    url: 'https://www.swpc.noaa.gov/products/goes-x-ray-flux',
+    holds: `${xrayFlux.length} points of GOES X-ray flux, ${protonFlux.length} of proton flux and ${kpIndex.length} of planetary Kp`,
+    use: 'The space weather panel in the simulator',
+    snapshot: swpcSnapshot,
+  },
+  {
+    name: 'NASA DONKI',
+    url: 'https://ccmc.gsfc.nasa.gov/tools/DONKI/',
+    holds: `${particleEvents().length} solar energetic particle events`,
+    use: 'The date and onset of the solar particle scenario',
+    snapshot: donkiSnapshot,
+  },
+  {
+    name: 'NASA Deep Space Network Now',
+    url: 'https://eyes.nasa.gov/apps/dsn-now/',
+    holds: `${antennas.length} antennas with a target, ${activeDownlinks().length} of them receiving data`,
+    use: 'The link rate: the slowest downlink in use when the snapshot was taken',
+    snapshot: dsnSnapshot,
+  },
+];
+
+const notUsed = [
+  {
+    name: 'NASA Open Science Data Repository',
+    url: 'https://science.nasa.gov/biological-physical/data/osdr/',
+    why: 'Its human data from spaceflight is laboratory samples, not continuous heart rate or skin temperature.',
+  },
+  {
+    name: 'PhysioNet, Wrist PPG During Exercise',
+    url: 'https://physionet.org/content/wrist/1.0.0/',
+    why: 'We could not extract heart rate from it reliably enough in the time we had, so it does not calibrate anything here.',
+  },
+];
+---
+<section class="section" id="data">
+  <p class="eyebrow">07 / Data sources</p>
+  <h2 class="section-title">Real where it exists. Labelled where it does not.</h2>
+  <p class="section-lede">
+    Distance, blackouts, space weather and link rate come from open data. No open record of an
+    astronaut's continuous heart rate exists, so every physiological reading is synthetic, and the
+    simulator says so on each panel.
+  </p>
+
+  <div class="table-wrap">
+    <table class="eval-table sources-table">
+      <thead>
+        <tr>
+          <th scope="col">Source</th>
+          <th scope="col">What the snapshot holds</th>
+          <th scope="col">Used for</th>
+          <th scope="col">Snapshot</th>
+        </tr>
+      </thead>
+      <tbody>
+        {sources.map((source) => (
+          <tr>
+            <th scope="row"><a href={source.url} rel="noopener">{source.name}</a></th>
+            <td data-column="What the snapshot holds">{source.holds}</td>
+            <td data-column="Used for">{source.use}</td>
+            <td data-column="Snapshot">{source.snapshot.retrievedAt}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+
+  <p>
+    Snapshots are files in the repository, each with its source, date and licence. The site builds and
+    runs from them without a network connection.
+  </p>
+
+  <h3 class="subsection-title">Looked at, not used</h3>
+  <ul class="limits">
+    {notUsed.map((source) => (
+      <li><a href={source.url} rel="noopener">{source.name}</a>. {source.why}</li>
+    ))}
+  </ul>
+  <p class="source">
+    The solar particle scenario takes its date from a real event; the packet loss it applies is our
+    assumption, not a measurement.
+  </p>
+</section>

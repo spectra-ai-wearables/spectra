@@ -1,7 +1,13 @@
 import { median } from './anomaly';
 import { EXERCISE_END, expectedHr } from './baseline';
 import { formatClock } from './format';
-import type { QualityReason, QueuedEvent, Sample, WindowResult } from './types';
+import type { QualityReason, Sample, WindowResult } from './types';
+
+/** How many of the session's incidents have reached the ground so far. */
+export interface Delivery {
+  total: number;
+  received: number;
+}
 
 export interface Insight {
   title: string;
@@ -28,7 +34,7 @@ function heartRateAround(samples: Sample[], from: number, to: number): number | 
 export function sessionInsights(
   samples: Sample[],
   results: WindowResult[],
-  events: QueuedEvent[],
+  delivery: Delivery,
 ): Insight[] {
   if (results.length === 0) {
     return [
@@ -123,12 +129,12 @@ export function sessionInsights(
   }
 
   // Ground link
-  if (events.length > 0) {
-    const received = events.filter((e) => e.stage === 'received').length;
-    const pending = events.length - received;
+  if (delivery.total > 0) {
+    const { received } = delivery;
+    const pending = delivery.total - received;
     insights.push({
       title: 'Ground link',
-      value: `${received} of ${events.length} received`,
+      value: `${received} of ${delivery.total} received`,
       detail:
         pending === 0
           ? 'Every event from this session has reached the ground team.'

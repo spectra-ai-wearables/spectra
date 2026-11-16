@@ -1,13 +1,15 @@
 import { sessionInsights } from '../sim/insights';
-import type { ScenarioId } from '../sim/types';
+import type { CrewId } from '../sim/scenarios';
 import { createDemo } from './controller';
 import { createInsightsPanel, createRenderer } from './render';
 
 /** Real milliseconds per simulated second: a 300 s session plays in 30 s. */
 const TICK_MS = 100;
+/** Simulated seconds per tick once the session is over and only the link is moving. */
+const DELIVERY_SECONDS = 20;
 
 function init(root: HTMLElement) {
-  const demo = createDemo('usual');
+  const demo = createDemo();
   const render = createRenderer(root);
   const insights = createInsightsPanel(root);
   const logPanel = root.querySelector<HTMLElement>('[data-log-panel]');
@@ -40,38 +42,61 @@ function init(root: HTMLElement) {
     demo.pause();
   };
 
-  const start = () => {
-    if (demo.view().settled) {
-      demo.reset();
-      insights.hide();
-    }
+  /** Runs the clock: one second per tick during the session, faster once only the link is moving. */
+  const run = () => {
     demo.play();
     timer ??= window.setInterval(() => {
-      demo.step();
-      if (demo.view().settled) stop();
+      const view = demo.view();
+      if (!view.finished) demo.step();
+      else if (view.link.available && !view.settled) demo.advance(DELIVERY_SECONDS);
+      // Nothing can move until the link is back: wait for the operator.
+      if (demo.view().finished && (demo.view().settled || !demo.view().link.available)) stop();
       paint();
     }, TICK_MS);
+  };
+
+  const restart = () => {
+    stop();
+    demo.reset();
+    insights.hide();
   };
 
   root.addEventListener('click', (event) => {
     const button = (event.target as Element).closest('button');
     if (!button || !root.contains(button)) return;
+    const data = button.dataset;
 
-    if (button.dataset.scenario) {
+    if (data.scenario) {
       stop();
-      demo.select(button.dataset.scenario as ScenarioId);
+      demo.select(data.scenario);
       insights.hide();
       // Selecting a scenario prepares it; starting remains an explicit action.
-    } else if ('play' in button.dataset) {
+    } else if (data.crew) {
+      demo.selectCrew(data.crew as CrewId);
+    } else if (data.raw) {
+      demo.requestRaw(data.raw);
+      run();
+    } else if ('play' in data) {
       if (demo.view().playing) stop();
-      else start();
-    } else if ('reset' in button.dataset) {
-      stop();
-      demo.reset();
-      insights.hide();
-    } else if ('link' in button.dataset) {
-      demo.setConnected(!demo.view().connected);
-    } else if ('fullscreen' in button.dataset) {
+      else {
+        if (demo.view().finished) restart();
+        run();
+      }
+    } else if ('reset' in data) {
+      restart();
+    } else if ('deliver' in data) {
+      run();
+    } else if ('contact' in data) {
+      demo.advanceToContact();
+      run();
+    } else if ('link' in data) {
+      demo.setConnected(!demo.view().link.switchOn);
+      if (demo.view().finished && demo.view().link.available) run();
+    } else if ('loss' in data) {
+      demo.setLossInjected(!demo.view().link.lossInjected);
+    } else if ('rate' in data) {
+      demo.setDegraded(!demo.view().link.degraded);
+    } else if ('fullscreen' in data) {
       if (focusDialog.open) focusDialog.close();
       else {
         focusDialog.append(root);
@@ -81,14 +106,27 @@ function init(root: HTMLElement) {
         focusButton.setAttribute('aria-pressed', 'true');
         focusButton.focus();
       }
-    } else if ('logs' in button.dataset && logPanel) {
+    } else if ('logs' in data && logPanel) {
       const open = logPanel.hidden;
       logPanel.hidden = !open;
       button.setAttribute('aria-pressed', String(open));
-    } else if ('insights' in button.dataset) {
+      button.textContent = open ? 'Hide event stream' : 'Show event stream';
+    } else if ('insights' in data) {
       const view = demo.view();
-      insights.show(sessionInsights(view.samples, view.results, view.events), view.elapsed);
+      insights.show(
+        sessionInsights(view.samples, view.results, {
+          total: view.incidents.length,
+          received: view.incidents.filter((item) => item.stage === 'received').length,
+        }),
+        view.clock,
+      );
     }
+    paint();
+  });
+
+  root.querySelector<HTMLInputElement>('[data-date]')?.addEventListener('change', (event) => {
+    const { value } = event.target as HTMLInputElement;
+    if (value) demo.setMissionDate(value);
     paint();
   });
 

@@ -1,73 +1,143 @@
 ---
 import { CHART, PHASE_MARKS, xAt } from '../demo/chart';
 import { SPECTRAL_BANDS_NM } from '../sim/generator';
+import { SCENARIOS, CREW } from '../sim/scenarios';
+import { dsnSnapshot, slowestDownlink } from '../sim/sources/dsn';
+import { coverage, horizonsSnapshot } from '../sim/sources/horizons';
+import {
+  STORM_FLOOR_PFU,
+  donkiSnapshot,
+  flareClass,
+  latestParticleEvent,
+  peakFlux,
+  peakKp,
+  peakProtons,
+  stormLevel,
+  swpcSnapshot,
+  xrayFlux,
+} from '../sim/sources/spaceWeather';
+import SourceBadge from './SourceBadge.astro';
 
-const scenarios = [
-  { id: 'usual', label: 'Usual recovery', description: 'Follow a typical session' },
-  { id: 'misplaced', label: 'Sensor misplaced', description: 'See how signal checks respond' },
-  { id: 'atypical', label: 'Atypical recovery, no link', description: 'See events saved on board' },
-];
 const gridHr = [60, 100, 140];
 const plotBottom = CHART.height - CHART.bottom;
 const gridY = (hr: number) =>
   CHART.top + (1 - (hr - CHART.minHr) / (CHART.maxHr - CHART.minHr)) * (plotBottom - CHART.top);
+
+const range = coverage();
+const downlink = slowestDownlink();
+
+// Space weather: one week of GOES X-ray flux on a logarithmic scale, A1 to X10.
+const SPARK = { width: 320, height: 72 };
+const logY = (wm2: number) => {
+  const share = (Math.log10(wm2) + 8) / 5;
+  return SPARK.height - Math.min(1, Math.max(0, share)) * SPARK.height;
+};
+const spark = xrayFlux
+  .map((point, i) => `${i === 0 ? 'M' : 'L'}${((i / (xrayFlux.length - 1)) * SPARK.width).toFixed(1)} ${logY(point.wm2).toFixed(1)}`)
+  .join('');
+const flare = peakFlux();
+const kp = peakKp();
+const protons = peakProtons();
+const storm = stormLevel(protons.pfu);
+const particle = latestParticleEvent();
+const day = (time: string) => time.slice(0, 10);
 ---
 <section class="section demo-section" id="demo">
   <div class="console-heading">
-    <div><p class="eyebrow">Live telemetry</p><h2 class="section-title">Crew &amp; ground.</h2></div>
-    <p>One session, two perspectives.<br />Local inference keeps running when the link goes down.</p>
+    <div><p class="eyebrow">Mission console</p><h2 class="section-title">Crew &amp; ground.</h2></div>
+    <p>One session, two points of view.<br />The crew sees it now. The ground sees it one light-time later.</p>
   </div>
 
   <noscript>
     <p class="demo-fallback">
-      The interactive demo needs JavaScript. Everything else on this page works without it.
+      The simulator needs JavaScript. Everything else on this site works without it.
     </p>
   </noscript>
 
   <div class="demo" data-demo hidden>
     <div class="demo-bar">
-      <div class="scenario-group"><p class="control-label">01 / Choose a scenario</p>
-      <div class="demo-scenarios" role="group" aria-label="Scenario">
-        {scenarios.map((scenario) => (
-          <button type="button" data-scenario={scenario.id} aria-pressed="false">
-            <strong>{scenario.label}</strong><small>{scenario.description}</small>
-          </button>
-        ))}
+      <div class="scenario-group">
+        <p class="control-label">01 / Choose a scenario</p>
+        <div class="demo-scenarios" role="group" aria-label="Scenario">
+          {SCENARIOS.map((scenario) => (
+            <button type="button" data-scenario={scenario.id} aria-pressed="false">
+              <strong>{scenario.label}</strong><small>{scenario.description}</small>
+            </button>
+          ))}
+        </div>
       </div>
+      <div class="controls-group">
+        <p class="control-label">02 / Run the session</p>
+        <div class="demo-controls">
+          <button type="button" data-play>Start session</button>
+          <button type="button" data-reset>Restart</button>
+          <button type="button" data-deliver hidden>Fast-forward to delivery</button>
+          <button type="button" data-fullscreen>Focus mode</button>
+          <button type="button" data-logs aria-pressed="false" aria-controls="demo-log">Show event stream</button>
+          <button type="button" data-insights>Summarize session</button>
+        </div>
       </div>
-      <div class="controls-group"><p class="control-label">02 / Session controls</p>
-      <div class="demo-controls">
-        <button type="button" data-play>Start session</button>
-        <button type="button" data-reset>Restart</button>
-        <button type="button" role="switch" aria-checked="true" data-link>
-          Link to Earth
-        </button>
-        <button type="button" data-fullscreen>Focus mode</button>
-        <button type="button" data-logs aria-pressed="false" aria-controls="demo-log">System log</button>
-        <button type="button" data-insights>Review session</button>
+      <div class="controls-group">
+        <p class="control-label">03 / Disturb the link</p>
+        <div class="demo-controls">
+          <button type="button" role="switch" aria-checked="true" data-link>Link to Earth</button>
+          <button type="button" role="switch" aria-checked="false" data-loss>Lose 30% of packets</button>
+          <button type="button" role="switch" aria-checked="false" data-rate>Cut rate to 1%</button>
+          <label class="date-field">
+            <span>Mission date</span>
+            <input type="date" data-date min={range.start} max={range.end} />
+          </label>
+        </div>
       </div>
-      </div>
-      <p class="demo-badge">Synthetic data</p>
+    </div>
+
+    <div class="brief" aria-live="polite">
+      <p><strong>Watch for:</strong> <span data-watch></span></p>
+      <p class="brief-basis"><span class="source" data-basis-badge>Synthetic</span> <span data-basis></span></p>
     </div>
 
     <dl class="telemetry">
       <div><dt>Mission clock</dt><dd>T+<span data-clock>00:00</span></dd></div>
       <div><dt>Phase</dt><dd data-phase>Rest</dd></div>
-      <div><dt>Sensor</dt><dd data-sensor data-level="idle">Standby</dd></div>
-      <div><dt>Model score</dt><dd data-model-score data-level="idle">Awaiting data</dd></div>
+      <div><dt>Light time, one way</dt><dd data-delay>—</dd></div>
       <div><dt>Link</dt><dd data-link-cell data-level="ok">Up</dd></div>
-      <div><dt>Queue</dt><dd data-queue data-level="idle">0 pending</dd></div>
+      <div><dt>On board, unsent</dt><dd data-queue data-level="idle">0</dd></div>
+      <div><dt>Reliable windows</dt><dd data-quality-budget data-level="idle">—</dd></div>
     </dl>
+
+    <section class="crew" aria-labelledby="crew-title">
+      <header class="panel-header">
+        <h3 id="crew-title">Crew</h3>
+        <SourceBadge kind="synthetic" />
+      </header>
+      <div class="crew-grid" role="group" aria-label="Astronaut shown in detail">
+        {CREW.map((member) => (
+          <button type="button" class="crew-card" data-crew={member.id} data-state="idle" aria-pressed="false">
+            <span class="crew-id">{member.id}</span>
+            <span class="crew-role">{member.role}</span>
+            <span class="crew-state" data-crew-state>Standby</span>
+            <span class="crew-cause" data-crew-cause></span>
+            <span class="heat" data-heat aria-hidden="true"></span>
+          </button>
+        ))}
+      </div>
+      <p class="panel-note">
+        Each strip shows one cell per ten-second window: brighter means further from that
+        astronaut's pattern, hatched means the window was discarded.
+      </p>
+    </section>
 
     <div class="demo-panels">
       <article class="panel panel-astronaut" aria-labelledby="panel-astronaut-title">
         <header class="panel-header">
-          <h3 id="panel-astronaut-title">Astronaut dashboard</h3>
+          <h3 id="panel-astronaut-title">On board: <span data-selected-name>Commander</span></h3>
+          <SourceBadge kind="synthetic" />
         </header>
 
         <div class="reading" data-reading data-state="idle" aria-live="polite">
           <p class="reading-label" data-label>Ready when you are</p>
           <p class="reading-detail" data-detail>Choose a scenario, then select Start session.</p>
+          <p class="reading-cause" data-cause-line hidden><strong>Likely cause:</strong> <span data-cause></span></p>
           <p class="reading-action"><strong>Next:</strong> <span data-action>Awaiting data</span></p>
         </div>
 
@@ -85,13 +155,13 @@ const gridY = (hr: number) =>
           <p class="detectors-note">
             Deviation score: how far the last window is from this astronaut's pattern, in
             units of their usual variation. The mark is the threshold of 3; three windows in a
-            row above it ask for a check. It is not a probability of illness.
+            row above it raise an alert. It is not a probability of illness.
           </p>
         </div>
 
         <figure class="chart">
           <svg viewBox={`0 0 ${CHART.width} ${CHART.height}`} role="img"
-            aria-label="Heart rate over the session against the individual baseline band">
+            aria-label="Heart rate over the session against the individual reference band">
             {gridHr.map((hr) => (
               <g class="chart-grid">
                 <line x1={CHART.left} x2={CHART.width - CHART.right} y1={gridY(hr)} y2={gridY(hr)} />
@@ -109,7 +179,7 @@ const gridY = (hr: number) =>
             <circle class="chart-head" data-head r="4" cx="-10" cy="-10" />
             <line class="chart-cursor" data-cursor x1={CHART.left} x2={CHART.left} y1={CHART.top} y2={plotBottom} />
           </svg>
-          <figcaption>Heart rate (bpm). Shaded band: this astronaut's reference for the activity.</figcaption>
+          <figcaption>Heart rate (bpm) as measured on board. Shaded band: this astronaut's reference for the activity.</figcaption>
         </figure>
 
         <dl class="metrics">
@@ -133,34 +203,142 @@ const gridY = (hr: number) =>
       </article>
 
       <div class="demo-side">
-      <article class="panel panel-ground" aria-labelledby="panel-ground-title">
-        <header class="panel-header">
-          <h3 id="panel-ground-title">Ground team</h3>
-          <p class="link-status" data-link-status data-connected="true">Link up</p>
-        </header>
-        <p class="events-empty" data-empty>No events to review. Updates appear here when a change persists.</p>
-        <ol class="events" data-events aria-live="polite"></ol>
-      </article>
+        <article class="panel panel-link" aria-labelledby="panel-link-title">
+          <header class="panel-header">
+            <h3 id="panel-link-title">Spectra Link</h3>
+            <SourceBadge kind="data" source="JPL Horizons" date={horizonsSnapshot.retrievedAt} />
+          </header>
+          <ol class="path" aria-label="Path of the data">
+            <li>Wristband</li>
+            <li>Onboard server</li>
+            <li>Spacecraft radio</li>
+            <li class="path-space" data-path data-state="up">
+              <span class="path-label" data-path-label></span>
+              <span class="path-track" data-track aria-hidden="true"></span>
+            </li>
+            <li>Deep Space Network</li>
+            <li>Mission control</li>
+          </ol>
+          <dl class="facts">
+            <div><dt>Earth to Mars</dt><dd data-distance>—</dd></div>
+            <div><dt>Link rate</dt><dd data-rate-value>—</dd></div>
+            <div><dt>Packets lost</dt><dd data-lost>0</dd></div>
+          </dl>
+          <p class="blackout" data-blackout hidden></p>
+          <button type="button" class="panel-action" data-contact hidden>Advance to the end of the blackout</button>
+          <table class="transfers">
+            <caption>Messages, most urgent first</caption>
+            <thead><tr><th scope="col">Message</th><th scope="col">Size</th><th scope="col">Status</th></tr></thead>
+            <tbody data-transfers></tbody>
+          </table>
+          <p class="transfers-empty" data-transfers-empty>Nothing queued yet. An update is prepared every minute.</p>
+          <p class="panel-note">
+            Distance and solar blackouts come from the ephemeris for the mission date.{' '}
+            {downlink
+              ? `The link rate is the slowest downlink the Deep Space Network was carrying on ${dsnSnapshot.retrievedAt}: ${(downlink.downBps / 1000).toFixed(0)} kb/s at ${downlink.station}.`
+              : 'The link rate is an assumed 8 kb/s.'}{' '}
+            Packet loss is modelled; the packets themselves are not encoded.
+          </p>
+        </article>
 
-      <article class="panel panel-insights" data-insights-panel hidden aria-labelledby="panel-insights-title">
-        <header class="panel-header">
-          <h3 id="panel-insights-title">Session insights</h3>
-          <p class="panel-meta" data-insights-time></p>
-        </header>
-        <dl class="insights" data-insights-list></dl>
-        <p class="panel-note">
-          Computed on board from this session's readings with fixed rules. A summary, not a
-          diagnosis.
-        </p>
-      </article>
+        <article class="panel panel-ground" aria-labelledby="panel-ground-title">
+          <header class="panel-header">
+            <h3 id="panel-ground-title">Ground team</h3>
+            <p class="link-status" data-link-status data-connected="true">Link up</p>
+          </header>
+          <p class="events-empty" data-empty>No incidents. An alert appears here once it has crossed the distance.</p>
+          <ol class="events" data-events aria-live="polite"></ol>
 
-      <article class="panel panel-log" id="demo-log" data-log-panel hidden aria-labelledby="panel-log-title">
-        <header class="panel-header">
-          <h3 id="panel-log-title">System log</h3>
-          <p class="panel-meta"><span data-log-count>0</span> entries</p>
-        </header>
-        <ol class="log" data-log role="log" aria-label="System log" tabindex="0"></ol>
-      </article>
+          <figure class="chart twin-chart">
+            <svg viewBox={`0 0 ${CHART.width} ${CHART.height}`} role="img"
+              aria-label="Heart rate of the selected astronaut as the ground can reconstruct it">
+              {gridHr.map((hr) => (
+                <g class="chart-grid">
+                  <line x1={CHART.left} x2={CHART.width - CHART.right} y1={gridY(hr)} y2={gridY(hr)} />
+                  <text x={CHART.left - 6} y={gridY(hr)} text-anchor="end" dominant-baseline="middle">{hr}</text>
+                </g>
+              ))}
+              <g data-twin-bands></g>
+              <path class="chart-line twin-line" data-twin-line d="" fill="none" />
+            </svg>
+            <figcaption>
+              The same astronaut, rebuilt on the ground from the reference model plus what was sent.
+              <span class="key key-reported">Reported</span>
+              <span class="key key-predicted">Matched the model</span>
+              <span class="key key-projected">No news yet: projected</span>
+              <span class="key key-gap">Discarded window</span>
+            </figcaption>
+          </figure>
+
+          <dl class="facts">
+            <div><dt>Bytes sent</dt><dd data-bytes-sent>0</dd></div>
+            <div><dt>Raw windows would be</dt><dd data-bytes-raw>0</dd></div>
+            <div><dt>Saved</dt><dd data-bytes-saved>—</dd></div>
+          </dl>
+          <dl class="facts">
+            <div><dt>Records on board</dt><dd data-ledger-head>0</dd></div>
+            <div><dt>Verified on ground</dt><dd data-ledger-verified>0</dd></div>
+            <div><dt>Duplicates dropped</dt><dd data-ledger-duplicates>0</dd></div>
+          </dl>
+          <p class="panel-note" data-ledger-note>
+            Every record carries the hash of the one before it. The ground checks the chain and
+            would ask only for the ranges it lacks.
+          </p>
+        </article>
+
+        <article class="panel panel-weather" aria-labelledby="panel-weather-title">
+          <header class="panel-header">
+            <h3 id="panel-weather-title">Space weather</h3>
+            <SourceBadge kind="data" source="NOAA SWPC" date={swpcSnapshot.retrievedAt} />
+          </header>
+          <figure class="spark">
+            <svg viewBox={`0 0 ${SPARK.width} ${SPARK.height}`} role="img" preserveAspectRatio="none"
+              aria-label={`Solar X-ray flux over seven days, peaking at class ${flareClass(flare.wm2)}`}>
+              {[1e-6, 1e-5, 1e-4].map((level) => (
+                <line class="spark-grid" x1="0" x2={SPARK.width} y1={logY(level)} y2={logY(level)} />
+              ))}
+              <path class="spark-line" d={spark} fill="none" />
+            </svg>
+            <figcaption>Solar X-ray flux, {day(xrayFlux[0].time)} to {day(xrayFlux.at(-1)!.time)}. Lines mark flare classes C, M and X.</figcaption>
+          </figure>
+          <dl class="facts">
+            <div><dt>Strongest flare</dt><dd>{flareClass(flare.wm2)}</dd></div>
+            <div><dt>Peak Kp</dt><dd>{kp.kp.toFixed(1)}</dd></div>
+            <div><dt>Peak protons</dt><dd>{protons.pfu.toFixed(1)} pfu</dd></div>
+          </dl>
+          <p class="panel-note">
+            {storm === 0
+              ? `Protons stayed below the ${STORM_FLOOR_PFU} pfu that starts a radiation storm on NOAA's scale.`
+              : `Protons reached radiation storm level S${storm} on NOAA's scale.`}{' '}
+            {particle &&
+              <Fragment>
+                Latest particle event in NASA DONKI ({donkiSnapshot.retrievedAt}):{' '}
+                <a href={particle.link} rel="noopener">{day(particle.time)}</a>. The solar particle
+                scenario replays its date.{' '}
+              </Fragment>}
+            This week's measurements are shown for context; they do not drive the readings.
+          </p>
+        </article>
+
+        <article class="panel panel-insights" data-insights-panel hidden aria-labelledby="panel-insights-title">
+          <header class="panel-header">
+            <h3 id="panel-insights-title">Session summary</h3>
+            <p class="panel-meta" data-insights-time></p>
+          </header>
+          <dl class="insights" data-insights-list></dl>
+          <p class="panel-note">
+            Computed on board from this session's readings with fixed rules. A summary, not a
+            diagnosis.
+          </p>
+        </article>
+
+        <article class="panel panel-log" id="demo-log" data-log-panel hidden aria-labelledby="panel-log-title">
+          <header class="panel-header">
+            <h3 id="panel-log-title">Event stream</h3>
+            <p class="panel-meta"><span data-log-count>0</span> entries</p>
+          </header>
+          <ol class="log" data-log role="log" aria-label="Event stream" tabindex="0"></ol>
+        </article>
       </div>
     </div>
   </div>

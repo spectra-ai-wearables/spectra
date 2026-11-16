@@ -2,24 +2,17 @@ import { describe, expect, test } from 'vitest';
 import { analyzeSession } from './anomaly';
 import { generateSession } from './generator';
 import { sessionInsights } from './insights';
-import type { Insight } from './insights';
-import type { QueuedEvent, ScenarioId } from './types';
+import type { Delivery, Insight } from './insights';
+import type { ScenarioId } from './types';
 
-function insightsFor(scenario: ScenarioId, seconds = 300, events: QueuedEvent[] = []) {
+function insightsFor(scenario: ScenarioId, seconds = 300, delivery: Delivery = { total: 0, received: 0 }) {
   const samples = generateSession(scenario).slice(0, seconds);
   const byTitle = new Map<string, Insight>();
-  for (const insight of sessionInsights(samples, analyzeSession(samples), events)) {
+  for (const insight of sessionInsights(samples, analyzeSession(samples), delivery)) {
     byTitle.set(insight.title, insight);
   }
   return byTitle;
 }
-
-const queued = (stage: QueuedEvent['stage']): QueuedEvent => ({
-  event: { id: 'evt-170', createdAt: 180, title: 'title', detail: 'detail' },
-  stage,
-  sentAt: null,
-  receivedAt: null,
-});
 
 describe('sessionInsights', () => {
   test('asks for more data before the first window', () => {
@@ -66,14 +59,14 @@ describe('sessionInsights', () => {
   });
 
   test('describes events still waiting on board', () => {
-    const link = insightsFor('atypical', 300, [queued('waiting')]).get('Ground link')!;
+    const link = insightsFor('atypical', 300, { total: 1, received: 0 }).get('Ground link')!;
     expect(link.value).toBe('0 of 1 received');
     expect(link.detail).toContain('1 event is saved on board');
   });
 
   test('never mentions disease or diagnosis', () => {
     for (const scenario of ['usual', 'misplaced', 'atypical'] as const) {
-      for (const insight of insightsFor(scenario, 300, [queued('received')]).values()) {
+      for (const insight of insightsFor(scenario, 300, { total: 1, received: 1 }).values()) {
         expect(`${insight.title} ${insight.value} ${insight.detail}`.toLowerCase()).not.toMatch(
           /disease|diagnos|probab/,
         );

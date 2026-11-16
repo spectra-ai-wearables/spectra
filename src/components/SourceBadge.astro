@@ -1,0 +1,12 @@
+---
+/** Says where a panel's numbers come from: a dated snapshot of open data, or the simulator. */
+interface Props {
+  kind: 'data' | 'synthetic';
+  source?: string;
+  date?: string;
+}
+const { kind, source, date } = Astro.props;
+---
+<span class="source" data-kind={kind}>
+  {kind === 'synthetic' ? 'Synthetic' : `${source} data · snapshot ${date}`}
+</span>

@@ -268,10 +268,12 @@ const day = (time: string) => time.slice(0, 10);
             </svg>
             <figcaption>
               The same astronaut, rebuilt on the ground from the reference model plus what was sent.
-              <span class="key key-reported">Reported</span>
-              <span class="key key-predicted">Matched the model</span>
-              <span class="key key-projected">No news yet: projected</span>
-              <span class="key key-gap">Discarded window</span>
+              <span class="keys">
+                <span class="key key-reported">Reported</span>{' '}
+                <span class="key key-predicted">Matched the model</span>{' '}
+                <span class="key key-projected">No news yet: projected</span>{' '}
+                <span class="key key-gap">Discarded window</span>
+              </span>
             </figcaption>
           </figure>
 

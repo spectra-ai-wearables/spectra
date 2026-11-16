@@ -687,20 +687,6 @@
 
 /* ---------- Renders, footer and the reward for the curious ---------- */
 
-.render-note {
-  display: block;
-  font-family: var(--font-mono);
-  font-size: 0.625rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-}
-
-.hero-stage .render-note {
-  padding-inline: var(--gutter);
-  text-align: right;
-}
-
 .badge-spectrum {
   padding: 2px var(--space-2);
   border: 1px solid var(--band-3);

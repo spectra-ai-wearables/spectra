@@ -60,7 +60,7 @@ Missing readings are never replaced with zero. A discarded window is shown as di
 
 ## Use of artificial intelligence
 
-- **Images.** Every image in `src/assets` was generated or edited with an AI image tool from the team's design direction. Each file carries a visible "AI-generated concept image" mark. No NASA logo or mark appears in them.
+- **Images.** Every image in `src/assets` was generated or edited with an AI image tool from the team's design direction. No NASA logo or mark appears in them.
 - **Code and copy.** An AI coding assistant (Claude Code) wrote most of the code, tests and site copy under the team's direction and review.
 - **Data.** No dataset here is AI-generated. The physiological readings come from a deterministic simulator in `src/sim/generator.ts`; the open data snapshots are stored as downloaded, reduced in resolution.
 

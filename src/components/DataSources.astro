@@ -34,18 +34,6 @@ const sources = [
   },
 ];
 
-const notUsed = [
-  {
-    name: 'NASA Open Science Data Repository',
-    url: 'https://science.nasa.gov/biological-physical/data/osdr/',
-    why: 'Its human data from spaceflight is laboratory samples, not continuous heart rate or skin temperature.',
-  },
-  {
-    name: 'PhysioNet, Wrist PPG During Exercise',
-    url: 'https://physionet.org/content/wrist/1.0.0/',
-    why: 'We could not extract heart rate from it reliably enough in the time we had, so it does not calibrate anything here.',
-  },
-];
 ---
 <section class="section" id="data">
   <p class="eyebrow">07 / Data sources</p>
@@ -84,12 +72,6 @@ const notUsed = [
     runs from them without a network connection.
   </p>
 
-  <h3 class="subsection-title">Looked at, not used</h3>
-  <ul class="limits">
-    {notUsed.map((source) => (
-      <li><a href={source.url} rel="noopener">{source.name}</a>. {source.why}</li>
-    ))}
-  </ul>
   <p class="source">
     The solar particle scenario takes its date from a real event; the packet loss it applies is our
     assumption, not a measurement.

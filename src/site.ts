@@ -6,7 +6,7 @@ export const site = {
   title: 'Spectra / on-board AI health monitoring for astronauts',
   description:
     'A multispectral wearable and on-board machine learning that help astronauts notice changes in their own health, even without a link to Earth.',
-  emails: ['me@borerto.com', 'me@baliestri.dev'],
+  emails: ['me@borerto.com', 'me@baliestri.dev', 'bernardopereirabraga@gmail.com'],
   repoUrl: 'https://github.com/spectra-ai-wearables/spectra',
   nasaSource: {
     label: 'NASA / The Human Body in Space',

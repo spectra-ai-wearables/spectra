@@ -394,8 +394,49 @@
   font-variant-numeric: tabular-nums;
 }
 
-.transfers tr[data-stage='received'] {
-  color: var(--text-muted);
+.transfers tbody tr[data-stage='received'] {
+  opacity: 0.6;
+}
+
+.transfer-status {
+  display: block;
+}
+
+.transfer-bar {
+  display: block;
+  height: 2px;
+  margin-top: var(--space-1);
+  overflow: hidden;
+  background: var(--line);
+}
+
+.transfer-bar i {
+  display: block;
+  height: 100%;
+  background: var(--text);
+  transform: scaleX(var(--p, 0));
+  transform-origin: left;
+}
+
+.transfers tr[data-stage='in-flight'] .transfer-bar i {
+  background: var(--band-2);
+}
+
+.transfers tr[data-stage='received'] .transfer-bar i {
+  background: var(--state-ok);
+}
+
+.transfers tr[data-stage='saved'] .transfer-bar,
+.transfers tr[data-stage='waiting'] .transfer-bar,
+.transfers tr[data-stage='repair'] .transfer-bar {
+  background: repeating-linear-gradient(90deg, var(--line) 0 4px, transparent 4px 8px);
+}
+
+.priority[data-priority='0'] {
+  padding: 0 3px;
+  border: 1px solid var(--state-verify);
+  border-radius: 2px;
+  color: var(--state-verify);
 }
 
 .transfers tr[data-stage='waiting'] td:last-child,

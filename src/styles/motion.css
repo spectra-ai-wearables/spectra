@@ -338,7 +338,15 @@ a {
   transition: transform 100ms linear;
 }
 
-.transfers tbody tr,
+/* Rows enter, change stage and reorder from the renderer; the bar follows the clock. */
+.transfer-bar i {
+  transition: transform 120ms linear;
+}
+
+.transfers tbody tr {
+  transition: opacity 400ms ease;
+}
+
 .brief span {
   animation: settle 250ms var(--ease-out);
 }

@@ -145,20 +145,95 @@ function incidentItem(item: GroundIncident, now: number): HTMLLIElement {
   return li;
 }
 
-function transferRow(item: Transfer, now: number): HTMLTableRowElement {
+interface TransferRow {
+  row: HTMLTableRowElement;
+  status: HTMLElement;
+  stage: TransferStage | null;
+}
+
+const prefersReducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const EASE = 'cubic-bezier(0.2, 0.7, 0.2, 1)';
+
+function transferStatus(item: Transfer, now: number): string {
+  if (item.stage === 'in-flight' && item.arrivesAt !== null) {
+    return `${STAGE_LABEL[item.stage]}, ${formatSpan(Math.max(0, item.arrivesAt - now))} to go`;
+  }
+  if (item.stage === 'sending') return `${STAGE_LABEL[item.stage]} ${item.sent}/${item.planned} packets`;
+  return STAGE_LABEL[item.stage];
+}
+
+/** How far a message is through its current stage, 0..1. */
+function transferProgress(item: Transfer, now: number): number {
+  if (item.stage === 'received') return 1;
+  if (item.stage === 'sending') return item.planned > 0 ? item.sent / item.planned : 0;
+  if (item.stage === 'in-flight' && item.departedAt !== null && item.arrivesAt !== null) {
+    return Math.min(1, Math.max(0, (now - item.departedAt) / Math.max(1, item.arrivesAt - item.departedAt)));
+  }
+  return 0;
+}
+
+function createTransferRow(item: Transfer): TransferRow {
   const row = document.createElement('tr');
-  row.dataset.stage = item.stage;
-  const status =
-    item.stage === 'in-flight' && item.arrivesAt !== null
-      ? `${STAGE_LABEL[item.stage]}, ${formatSpan(Math.max(0, item.arrivesAt - now))} to go`
-      : item.stage === 'sending'
-        ? `${STAGE_LABEL[item.stage]} ${item.sent}/${item.planned} packets`
-        : STAGE_LABEL[item.stage];
   const name = document.createElement('th');
   name.scope = 'row';
-  name.append(text('priority', `P${item.message.priority}`, 'span'), ` ${item.message.label}`);
-  row.append(name, text('', formatBytes(item.message.bytes), 'td'), text('', status, 'td'));
-  return row;
+  const chip = text('priority', `P${item.message.priority}`, 'span');
+  chip.dataset.priority = String(item.message.priority);
+  name.append(chip, ` ${item.message.label}`);
+  const cell = document.createElement('td');
+  const status = text('transfer-status', '', 'span');
+  const bar = text('transfer-bar', '', 'span');
+  bar.setAttribute('aria-hidden', 'true');
+  bar.append(document.createElement('i'));
+  cell.append(status, bar);
+  row.append(name, text('', formatBytes(item.message.bytes), 'td'), cell);
+  return { row, status, stage: null };
+}
+
+/**
+ * Keeps one row per message for as long as the message exists, so only what
+ * changed moves: a new row slides in, a change of stage flashes once, and rows
+ * glide to their new place when the order changes.
+ */
+function syncTransfers(body: HTMLElement, rows: Map<string, TransferRow>, ordered: Transfer[], now: number) {
+  const animate = !prefersReducedMotion();
+  const wanted = new Set(ordered.map((item) => item.message.id));
+  for (const [id, entry] of rows) {
+    if (wanted.has(id)) continue;
+    entry.row.remove();
+    rows.delete(id);
+  }
+
+  const before = new Map<HTMLElement, number>();
+  for (const entry of rows.values()) before.set(entry.row, entry.row.getBoundingClientRect().top);
+
+  ordered.forEach((item, index) => {
+    let entry = rows.get(item.message.id);
+    const isNew = entry === undefined;
+    if (!entry) {
+      entry = createTransferRow(item);
+      rows.set(item.message.id, entry);
+    }
+    if (body.children[index] !== entry.row) body.insertBefore(entry.row, body.children[index] ?? null);
+
+    entry.status.textContent = transferStatus(item, now);
+    entry.row.style.setProperty('--p', transferProgress(item, now).toFixed(3));
+    if (entry.stage !== item.stage) {
+      entry.row.dataset.stage = item.stage;
+      if (animate && !isNew) {
+        entry.status.animate([{ opacity: 0.2, transform: 'translateY(3px)' }, { opacity: 1, transform: 'none' }], { duration: 260, easing: EASE });
+      }
+      entry.stage = item.stage;
+    }
+    if (animate && isNew) {
+      entry.row.animate([{ opacity: 0, transform: 'translateY(8px)' }, { opacity: 1, transform: 'none' }], { duration: 320, easing: EASE });
+    }
+  });
+
+  if (!animate) return;
+  for (const [row, top] of before) {
+    const moved = top - row.getBoundingClientRect().top;
+    if (Math.abs(moved) > 1) row.animate([{ transform: `translateY(${moved}px)` }, { transform: 'none' }], { duration: 320, easing: EASE });
+  }
 }
 
 function logItem(entry: LogEntry): HTMLLIElement {
@@ -265,7 +340,7 @@ export function createRenderer(root: HTMLElement): (view: DemoView) => void {
 
   el.band.setAttribute('d', bandPath());
   let lastEvents = '';
-  let lastTransfers = '';
+  const transferRows = new Map<string, TransferRow>();
   let lastTwin = '';
   let loggedEntries = 0;
 
@@ -398,12 +473,8 @@ export function createRenderer(root: HTMLElement): (view: DemoView) => void {
     const ordered = [...view.transfers].sort(
       (a, b) => Number(a.stage === 'received') - Number(b.stage === 'received') || a.message.priority - b.message.priority || a.message.createdAt - b.message.createdAt,
     );
-    const transferKey = ordered.map((item) => `${item.message.id}:${item.stage}:${item.sent}:${item.stage === 'in-flight' ? view.clock : ''}`).join('|');
-    if (transferKey !== lastTransfers) {
-      lastTransfers = transferKey;
-      el.transfers.replaceChildren(...ordered.map((item) => transferRow(item, view.clock)));
-      el.transfersEmpty.hidden = ordered.length > 0;
-    }
+    syncTransfers(el.transfers, transferRows, ordered, view.clock);
+    el.transfersEmpty.hidden = ordered.length > 0;
 
     // Ground panel
     el.linkStatus.dataset.connected = String(view.link.available);

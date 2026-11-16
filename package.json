@@ -9,7 +9,8 @@
     "preview": "astro preview",
     "check": "astro check",
     "test": "vitest run",
-    "train": "tsx scripts/train.ts"
+    "train": "tsx scripts/train.ts",
+    "data": "tsx scripts/fetch-data.ts"
   },
   "devEngines": {
     "packageManager": {

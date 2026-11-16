@@ -45,6 +45,33 @@ export interface SessionOptions {
    * exactly the same way twice. Off by default so the demo scenarios stay fixed.
    */
   vary?: boolean;
+  /** The band loses skin contact over this stretch of the session. */
+  noContact?: Range;
+  /** Movement swamps the optical reading over this stretch. */
+  motionArtifact?: Range;
+  /** The instrument drifts: the heart-rate reading gains a bias the body does not have. */
+  sensorDrift?: Drift;
+  /** The body drifts: the true heart rate moves away from the reference, slowly. */
+  slowDrift?: Drift;
+  /** Something in the cabin raises everyone's heart rate over this stretch. */
+  cabin?: { from: number; to: number; bpm: number };
+}
+
+export interface Drift {
+  from: number;
+  bpmPerMinute: number;
+}
+
+/** Seconds a cabin-wide change takes to build up and to fade. */
+const CABIN_RAMP = 20;
+
+const driftAt = (drift: Drift | undefined, t: number) =>
+  drift && t > drift.from ? ((t - drift.from) / 60) * drift.bpmPerMinute : 0;
+
+function cabinAt(cabin: SessionOptions['cabin'], t: number): number {
+  if (!cabin || t < cabin.from || t >= cabin.to) return 0;
+  const ramp = Math.min(1, (t - cabin.from) / CABIN_RAMP, (cabin.to - t) / CABIN_RAMP);
+  return cabin.bpm * ramp;
 }
 
 const clamp01 = (value: number) => Math.min(1, Math.max(0, value));
@@ -75,27 +102,31 @@ export function generateSession(scenario: ScenarioId, options: SessionOptions = 
     const motionNoise = gauss();
     const spectralNoise = SPECTRAL_BASE.map(() => gauss());
 
-    const artifact = inRange(config.motionArtifact, t);
+    const artifact = inRange(options.motionArtifact ?? config.motionArtifact, t);
     const motion = round(
       clamp01((artifact ? 0.95 : PHASE_MOTION[phase]) + 0.03 * motionNoise),
       3,
     );
 
-    if (inRange(config.noContact, t)) {
+    if (inRange(options.noContact ?? config.noContact, t)) {
       samples.push({ t, phase, contact: false, hr: null, skinTemp: null, spectral: null, motion });
       continue;
     }
 
-    const trueHr = expectedHr(t, recoveryTau) + restingOffset;
+    const trueHr =
+      expectedHr(t, recoveryTau) + restingOffset + driftAt(options.slowDrift, t) + cabinAt(options.cabin, t);
     const effort = (trueHr - RESTING_HR) / (EXERCISE_HR - RESTING_HR);
+    // A drifting instrument biases the optical channels; the body is unchanged.
+    const bias = driftAt(options.sensorDrift, t);
+    const gain = 1 + 0.12 * effort + bias / 100;
     samples.push({
       t,
       phase,
       contact: true,
-      hr: round(trueHr + (artifact ? 15 : 2) * hrNoise, 1),
+      hr: round(trueHr + bias + (artifact ? 15 : 2) * hrNoise, 1),
       skinTemp: round(33.4 + 1.1 * effort + 0.05 * tempNoise, 2),
       spectral: SPECTRAL_BASE.map((base, i) =>
-        round(clamp01(base * (1 + 0.12 * effort) + 0.01 * spectralNoise[i]), 3),
+        round(clamp01(base * gain + 0.01 * spectralNoise[i]), 3),
       ),
       motion,
     });

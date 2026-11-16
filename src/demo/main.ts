@@ -2,6 +2,7 @@ import { sessionInsights } from '../sim/insights';
 import type { CrewId } from '../sim/scenarios';
 import { createDemo } from './controller';
 import { createInsightsPanel, createRenderer } from './render';
+import { createTour } from './tour';
 
 /** Real milliseconds per simulated second: a 300 s session plays in 30 s. */
 const TICK_MS = 100;
@@ -63,7 +64,7 @@ function init(root: HTMLElement) {
 
   root.addEventListener('click', (event) => {
     const button = (event.target as Element).closest('button');
-    if (!button || !root.contains(button)) return;
+    if (!button || !root.contains(button) || button.closest('[data-tour]') || 'tourOpen' in button.dataset) return;
     const data = button.dataset;
 
     if (data.scenario) {
@@ -132,6 +133,7 @@ function init(root: HTMLElement) {
 
   root.hidden = false;
   paint();
+  createTour(root).offer();
 }
 
 const root = document.querySelector<HTMLElement>('[data-demo]');

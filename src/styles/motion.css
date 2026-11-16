@@ -360,3 +360,13 @@ a {
     transform: translateY(-2px);
   }
 }
+
+/* ---------- Guided tour ---------- */
+
+.tour:not([hidden]) {
+  animation: rise-in 300ms var(--ease-out);
+}
+
+[data-tour-on] {
+  animation: fade-in 300ms ease-out;
+}

@@ -747,3 +747,100 @@
 :root[data-spectrum] ::selection {
   background: color-mix(in srgb, var(--band-3) 40%, transparent);
 }
+
+/* ---------- Guided tour ---------- */
+
+.guide {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  font-size: var(--step--1);
+}
+
+.tour {
+  position: fixed;
+  right: var(--gutter);
+  bottom: var(--gutter);
+  z-index: 20;
+  display: grid;
+  gap: var(--space-2);
+  width: min(26rem, 100vw - 2 * var(--gutter));
+  padding: var(--space-4);
+  background: var(--surface-raised);
+  border: 1px solid var(--text);
+  border-radius: 10px;
+  box-shadow: 0 16px 48px rgb(0 0 0 / 0.5);
+}
+
+.tour[hidden] {
+  display: none;
+}
+
+.tour-count {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.tour h3 {
+  font-size: var(--step-1);
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.tour-text {
+  font-size: var(--step-0);
+  line-height: 1.55;
+}
+
+.tour-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.tour-actions button {
+  min-height: 2.75rem;
+  padding: var(--space-2) var(--space-3);
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  font-size: var(--step--1);
+  cursor: pointer;
+}
+
+.tour-actions button:first-child {
+  margin-right: auto;
+  border-color: transparent;
+  color: var(--text-muted);
+  text-decoration: underline;
+}
+
+.tour-actions button:disabled {
+  color: var(--text-muted);
+  cursor: default;
+}
+
+.tour-actions .tour-next {
+  background: var(--text);
+  border-color: var(--text);
+  color: var(--bg);
+  font-weight: 600;
+}
+
+/* The part of the screen the tour is talking about. */
+[data-tour-on] {
+  outline: 2px solid var(--text);
+  outline-offset: 6px;
+  border-radius: 6px;
+  scroll-margin-block: var(--space-4);
+}
